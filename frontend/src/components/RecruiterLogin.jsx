@@ -1,20 +1,68 @@
+import axios from "axios";
 import { useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
 
 const RecruiterLogin = () => {
+  const navigate = useNavigate();
+
   const [state, setState] = useState("Login");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState(false);
   const [isDataSubmitted, setIsDataSumbitted] = useState(false);
-  const { setShowRecruiterLogin } = useContext(AppContext);
+  const { setShowRecruiterLogin, backendUrl, setCompanyData, setCompanyToken } =
+    useContext(AppContext);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
     if (state == "Sign Up" && !isDataSubmitted) {
-      setIsDataSumbitted(true);
+      return setIsDataSumbitted(true);
+    }
+
+    try {
+      if (state === "Login") {
+        const { data } = await axios.post(backendUrl + "/api/company/login", {
+          email,
+          password,
+        });
+
+        if (data.success) {
+          setCompanyData(data.company);
+          setCompanyToken(data.token);
+          localStorage.setItem("companyToken", data.token);
+          setShowRecruiterLogin(false);
+          navigate("/dashboard");
+        } else {
+          toast.error(data.message);
+        }
+      } else {
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("password", password);
+        formData.append("email", email);
+        formData.append("image", image);
+
+        const { data } = await axios.post(
+          backendUrl + "/api/company/register",
+          formData
+        );
+
+        if (data.success) {
+          setCompanyData(data.company);
+          setCompanyToken(data.token);
+          localStorage.setItem("companyToken", data.token);
+          setShowRecruiterLogin(false);
+          navigate("/dashboard");
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      toast.error(error.message);
     }
   };
 
@@ -25,14 +73,12 @@ const RecruiterLogin = () => {
     };
   }, []);
 
-
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 z-10 backdrop-blur-sm bg-black/30 flex justify-center items-center">
       <form
         onSubmit={onSubmitHandler}
         className="relative bg-white p-10 rounded-xl text-slate-600"
       >
-
         <h1 className="text-center text-2xl text-neutral-800">
           Recruiter {state}
         </h1>
@@ -42,7 +88,7 @@ const RecruiterLogin = () => {
         {state === "Sign Up" && isDataSubmitted ? (
           <>
             <img
-              onClick={()=> setIsDataSumbitted(false)}
+              onClick={() => setIsDataSumbitted(false)}
               className="absolute top-6.5 left-6.5 w-4 cursor-pointer hover:scale-110 transition"
               src={assets.back_arrow_icon}
               alt=""
@@ -117,7 +163,7 @@ const RecruiterLogin = () => {
 
         <button
           type="submit"
-          className="bg-blue-600 w-full text-white py-2 rounded-full mt-5"
+          className="bg-blue-600 w-full text-white py-2 rounded-full mt-5 cursor-pointer"
         >
           {state === "Login"
             ? "login"
