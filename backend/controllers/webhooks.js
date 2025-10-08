@@ -2,7 +2,6 @@ import { Webhook } from "svix";
 import User from "../models/User.js";
 
 // API controller function to manage clerk user with database
-
 export const clerkWebhooks = async (req, res) => {
   try {
     // create a Svix instance with clerk webhooks secret
@@ -16,7 +15,6 @@ export const clerkWebhooks = async (req, res) => {
     });
 
     // Getting data from request body
-
     const { data, type } = req.body;
 
     // Switch case for different events

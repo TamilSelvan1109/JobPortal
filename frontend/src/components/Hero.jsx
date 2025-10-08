@@ -36,6 +36,7 @@ const Hero = () => {
               className="max-sm:text-xs p-2 rounded outline-none w-full"
             />
           </div>
+
           <div className="flex items-center">
             <img className="h-4 sm:h-5" src={assets.location_icon} alt="" />
             <input
@@ -45,9 +46,10 @@ const Hero = () => {
               className="max-sm:text-xs p-2 rounded outline-none w-full"
             />
           </div>
+
           <button
             onClick={onSearch}
-            className="bg-blue-600 px-6 py-2 rounded text-white  cursor-pointer"
+            className="bg-blue-600 px-6 py-2 rounded text-white cursor-pointer"
           >
             Search
           </button>
