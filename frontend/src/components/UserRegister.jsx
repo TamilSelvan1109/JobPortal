@@ -1,6 +1,10 @@
 import axios from "axios";
 import { useContext, useState } from "react";
+<<<<<<< HEAD
 import { AuthContext } from "../context/AuthContext";
+=======
+import { AppContext } from "../context/AppContext";
+>>>>>>> 0391c8a (user and company register done)
 
 const UserRegister = () => {
   const [isLogin, setIsLogin] = useState(true);

@@ -6,12 +6,19 @@ import Job from "../models/Job.js";
 import JobApplication from "../models/JobApplication.js";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+<<<<<<< HEAD
+=======
+import Company from "../models/Company.js";
+>>>>>>> 0391c8a (user and company register done)
 
 // Register a new user
 export const registerUser = async (req, res) => {
   try {
+<<<<<<< HEAD
     console.log(req.body);
     console.log(req.file);
+=======
+>>>>>>> 0391c8a (user and company register done)
 
     const { name, email, phone, password, role } = req.body;
     const profileImage = req.file;
@@ -32,15 +39,45 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const imageUpload = await cloudinary.uploader.upload(profileImage.path);
+<<<<<<< HEAD
 
     const newUser = await User.create({
       _id: new mongoose.Types.ObjectId(),
+=======
+    let companyId = null;
+
+    if(role==="Recruiter"){
+      const newCompany = await Company.create({
+        name,
+        contactEmail:email,
+        image: imageUpload.secure_url,
+      });
+
+      companyId = newCompany._id;
+    }
+
+    const newUser = await User.create({
+>>>>>>> 0391c8a (user and company register done)
       name,
       email,
       phone,
       password: hashedPassword,
       role,
       image: imageUpload.secure_url,
+<<<<<<< HEAD
+=======
+      profile:{
+        company:companyId
+      }
+    });
+    
+    const token = generateToken(newUser._id);
+    
+    res.cookie("token", token, {
+      maxAge: 1 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: "strict",
+>>>>>>> 0391c8a (user and company register done)
     });
 
     res.status(201).json({
@@ -52,8 +89,12 @@ export const registerUser = async (req, res) => {
         phone: newUser.phone,
         role: newUser.role,
         image: newUser.image,
+<<<<<<< HEAD
       },
       token: generateToken(newUser._id),
+=======
+      }
+>>>>>>> 0391c8a (user and company register done)
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -63,7 +104,11 @@ export const registerUser = async (req, res) => {
 // User login
 export const loginUser = async (req, res) => {
   try {
+<<<<<<< HEAD
     const { email, password } = req.body;
+=======
+    const { email, password , role} = req.body;
+>>>>>>> 0391c8a (user and company register done)
     if (!email || !password) {
       return res
         .status(400)
@@ -88,11 +133,15 @@ export const loginUser = async (req, res) => {
         .json({ success: false, message: "Invalid role selected" });
     }
 
+<<<<<<< HEAD
     const tokenData = { userId: user._id };
 
     const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
+=======
+    const token = generateToken(user.id);
+>>>>>>> 0391c8a (user and company register done)
 
     return res
       .status(200)
@@ -111,7 +160,11 @@ export const loginUser = async (req, res) => {
           phone: user.phone,
           role: user.role,
           image: user.image,
+<<<<<<< HEAD
         },
+=======
+        }
+>>>>>>> 0391c8a (user and company register done)
       });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -139,8 +192,16 @@ export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.id;
     const { name, phone, bio, skills } = req.body;
+<<<<<<< HEAD
     const profileImage = req.file;
     const userData = await User.findById(userId);
+=======
+    const profileImage = req.file || null;
+    const userData = await User.findById(userId);
+    if(!userData){
+      return res.status(400).json({success:false, message:"User not found!"})
+    }
+>>>>>>> 0391c8a (user and company register done)
 
     if (profileImage) {
       const imageUpload = await cloudinary.uploader.upload(profileImage.path);
@@ -228,12 +289,17 @@ export const getUserJobApplications = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // Update user profile
+=======
+// Update user resume
+>>>>>>> 0391c8a (user and company register done)
 export const updateUserResume = async (req, res) => {
   try {
     const userId = req.id;
     const resumeFile = req.file;
     const userData = await User.findById(userId);
+<<<<<<< HEAD
     if (resumeFile) {
       const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
       userData.resume = resumeUpload.secure_url;
@@ -241,6 +307,15 @@ export const updateUserResume = async (req, res) => {
 
     await userData.save();
     return res.json({ success: true, message: "Resume Updated" });
+=======
+    if (!resumeFile) {
+      return res.status(400).json({success:false, message:"Upload resume!"})
+    }
+    const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
+    userData.profile.resume = resumeUpload.secure_url;
+    await userData.save();
+    return res.json({ success: true, message: "Resume Updated", user:userData });
+>>>>>>> 0391c8a (user and company register done)
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
