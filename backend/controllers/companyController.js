@@ -1,0 +1,80 @@
+import bcrypt from "bcrypt";
+import { v2 as cloudinary } from "cloudinary";
+import Company from "../models/Company.js";
+import Job from "../models/Job.js";
+import JobApplication from "../models/JobApplication.js";
+import generateToken from "../utils/generateToken.js";
+
+// Get company data
+export const getCompanyData = async (req, res) => {
+  try {
+    const company = req.company;
+    res.json({ success: true, company });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Post a new job
+export const postJob = async (req, res) => {
+  const { title, description, location, salary, level, category } = req.body;
+  const companyId = req.company._id;
+  try {
+    const newJob = new Job({
+      title,
+      description,
+      location,
+      salary,
+      companyId,
+      date: Date.now(),
+      level,
+      category,
+    });
+
+    await newJob.save();
+    res.json({ success: true, newJob });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Get company job applicants
+export const getCompanyJobApplicants = async (req, res) => {};
+
+// Get company posted jobs
+export const getCompanyPostedJobs = async (req, res) => {
+  try {
+    const companyId = req.company._id;
+    const jobs = await Job.find({ companyId });
+    // Adding No of Applicants info in data
+    const jobsData = await Promise.all(
+      jobs.map(async (job) => {
+        const applicants = await JobApplication.find({ JobId: job._id });
+        return { ...job.toObject(), applicants: applicants.length };
+      })
+    );
+    res.json({ success: true, jobsData });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// Change job application status
+export const changeJobApllicationStatus = async (req, res) => {};
+
+// Change job visibility
+export const changeJobVisiblty = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const companyId = req.company._id;
+    const job = await Job.findById(id);
+    if (companyId.toString() === job.companyId.toString()) {
+      job.visible = !job.visible;
+    }
+
+    await job.save();
+    res.json({ success: true, job });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
