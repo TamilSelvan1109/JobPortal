@@ -6,26 +6,11 @@ import Job from "../models/Job.js";
 import JobApplication from "../models/JobApplication.js";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 import Company from "../models/Company.js";
->>>>>>> 0391c8a (user and company register done)
-=======
-import Company from "../models/Company.js";
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
 
 // Register a new user
 export const registerUser = async (req, res) => {
   try {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    console.log(req.body);
-    console.log(req.file);
-=======
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
 
     const { name, email, phone, password, role } = req.body;
     const profileImage = req.file;
@@ -46,14 +31,6 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const imageUpload = await cloudinary.uploader.upload(profileImage.path);
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-    const newUser = await User.create({
-      _id: new mongoose.Types.ObjectId(),
-=======
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     let companyId = null;
 
     if(role==="Recruiter"){
@@ -67,21 +44,12 @@ export const registerUser = async (req, res) => {
     }
 
     const newUser = await User.create({
-<<<<<<< HEAD
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
       name,
       email,
       phone,
       password: hashedPassword,
       role,
       image: imageUpload.secure_url,
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
       profile:{
         company:companyId
       }
@@ -93,10 +61,6 @@ export const registerUser = async (req, res) => {
       maxAge: 1 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       sameSite: "strict",
-<<<<<<< HEAD
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     });
 
     res.status(201).json({
@@ -108,16 +72,7 @@ export const registerUser = async (req, res) => {
         phone: newUser.phone,
         role: newUser.role,
         image: newUser.image,
-<<<<<<< HEAD
-<<<<<<< HEAD
-      },
-      token: generateToken(newUser._id),
-=======
       }
->>>>>>> 0391c8a (user and company register done)
-=======
-      }
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -127,15 +82,7 @@ export const registerUser = async (req, res) => {
 // User login
 export const loginUser = async (req, res) => {
   try {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const { email, password } = req.body;
-=======
     const { email, password , role} = req.body;
->>>>>>> 0391c8a (user and company register done)
-=======
-    const { email, password , role} = req.body;
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     if (!email || !password) {
       return res
         .status(400)
@@ -160,19 +107,7 @@ export const loginUser = async (req, res) => {
         .json({ success: false, message: "Invalid role selected" });
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const tokenData = { userId: user._id };
-
-    const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-=======
     const token = generateToken(user.id);
->>>>>>> 0391c8a (user and company register done)
-=======
-    const token = generateToken(user.id);
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
 
     return res
       .status(200)
@@ -191,15 +126,7 @@ export const loginUser = async (req, res) => {
           phone: user.phone,
           role: user.role,
           image: user.image,
-<<<<<<< HEAD
-<<<<<<< HEAD
-        },
-=======
         }
->>>>>>> 0391c8a (user and company register done)
-=======
-        }
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
       });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -227,22 +154,11 @@ export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.id;
     const { name, phone, bio, skills } = req.body;
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const profileImage = req.file;
-    const userData = await User.findById(userId);
-=======
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     const profileImage = req.file || null;
     const userData = await User.findById(userId);
     if(!userData){
       return res.status(400).json({success:false, message:"User not found!"})
     }
-<<<<<<< HEAD
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
 
     if (profileImage) {
       const imageUpload = await cloudinary.uploader.upload(profileImage.path);
@@ -330,32 +246,12 @@ export const getUserJobApplications = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-// Update user profile
-=======
 // Update user resume
->>>>>>> 0391c8a (user and company register done)
-=======
-// Update user resume
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
 export const updateUserResume = async (req, res) => {
   try {
     const userId = req.id;
     const resumeFile = req.file;
     const userData = await User.findById(userId);
-<<<<<<< HEAD
-<<<<<<< HEAD
-    if (resumeFile) {
-      const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
-      userData.resume = resumeUpload.secure_url;
-    }
-
-    await userData.save();
-    return res.json({ success: true, message: "Resume Updated" });
-=======
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     if (!resumeFile) {
       return res.status(400).json({success:false, message:"Upload resume!"})
     }
@@ -363,10 +259,6 @@ export const updateUserResume = async (req, res) => {
     userData.profile.resume = resumeUpload.secure_url;
     await userData.save();
     return res.json({ success: true, message: "Resume Updated", user:userData });
-<<<<<<< HEAD
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
