@@ -1,4 +1,5 @@
 import axios from "axios";
+import { use } from "react";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -21,6 +22,8 @@ export const AppContextProvider = (props) => {
 
   const [showLogin, setShowLogin] = useState(false);
 
+  const [isLogin, setIsLogin] = useState(true);
+
   const [companyToken, setCompanyToken] = useState(null);
 
   const [companyData, setCompanyData] = useState(null);
@@ -32,18 +35,14 @@ export const AppContextProvider = (props) => {
   // Function to fetch user data
   const fetchUserData = async () => {
     try {
-      const token = await getToken();
-      if (!token) {
-        console.warn("No token available yet.");
-        return;
-      } else {
-        console.log("Token", token);
-      }
-      const { data } = await axios.get(`${backendUrl}/api/users/user`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (data.success) {
+      const {data} = await axios.get(`${backendUrl}/api/users/user`,{
+        withCredentials: true,
+      })
+      console.log(data);
+      
+      if(data.success){
         setUserData(data.user);
+        console.log(data.user);
       } else {
         toast.error(data.message);
       }
@@ -58,7 +57,6 @@ export const AppContextProvider = (props) => {
       const { data } = await axios.get(`${backendUrl}/api/jobs`);
       if (data.success) {
         setJobs(data.jobs);
-        console.log(data.jobs);
       } else {
         toast.error(data.message);
       }
@@ -85,24 +83,25 @@ export const AppContextProvider = (props) => {
   };
 
   useEffect(() => {
-    fetchJobs();
-    const storedCompanyToken = localStorage.getItem("companyToken");
-    if (storedCompanyToken) {
-      setCompanyToken(storedCompanyToken);
-    }
-  }, []);
+      const initialize = async () => {
+          await fetchJobs();
+          await fetchUserData(); 
+      };
+      
+      initialize();
+
+      const storedCompanyToken = localStorage.getItem("companyToken");
+      if (storedCompanyToken) {
+        setCompanyToken(storedCompanyToken);
+      }
+    }, []);
 
   useEffect(() => {
-    if (companyToken) {
-      fetchCompanyData();
-    }
+      if (companyToken) {
+        fetchCompanyData();
+      }
   }, [companyToken]);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-    }
-  }, [user]);
 
   const value = {
     searchFilter,
@@ -118,6 +117,13 @@ export const AppContextProvider = (props) => {
     companyData,
     setCompanyData,
     backendUrl,
+    isLogin,
+    setIsLogin,
+    fetchUserData,
+    userData,
+    setUserData,
+    userApplications,
+    setUserApplications,
   };
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
