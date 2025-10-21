@@ -2,16 +2,6 @@ import mongoose, { skipMiddlewareFunction } from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-<<<<<<< HEAD
-<<<<<<< HEAD
-    _id: {
-      type: String,
-      required: true,
-    },
-=======
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     name: {
       type: String,
       required: true,
@@ -31,15 +21,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-<<<<<<< HEAD
-<<<<<<< HEAD
-      enum: ["user", "company"],
-=======
       enum: ["User", "Recruiter"],
->>>>>>> 0391c8a (user and company register done)
-=======
-      enum: ["User", "Recruiter"],
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
       required: true,
     },
     image: {

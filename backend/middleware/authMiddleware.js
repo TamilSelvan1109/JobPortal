@@ -14,15 +14,7 @@ export const isAuthenticated = async (req, res, next) => {
         message: "Token verification failed, Login Again",
       });
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
-    req.id = decoded.userId;
-=======
     req.id = decoded.id;
->>>>>>> 0391c8a (user and company register done)
-=======
-    req.id = decoded.id;
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
     next();
   } catch (error) {
     res.json({ success: false, message: error.message });
