@@ -4,40 +4,67 @@ import { AppContext } from "../context/AppContext";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { setShowLogin } = useContext(AppContext);
-  const user = null; // Placeholder for user authentication status
+  const { setShowLogin, setIsLogin , userData} = useContext(AppContext);
 
   return (
-    <div className="shadow py-4">
-      <div className="container px-4 2xl:px-20 mx-auto flex justify-between items-center">
-        <h1
-          className="text-3xl font-extrabold cursor-pointer"
-          onClick={() => navigate("/")}
+<div className="shadow-sm bg-white py-4">
+  <div className="container px-4 2xl:px-20 mx-auto flex justify-between items-center">
+    {/* --- Logo --- */}
+    <h1
+      className="text-3xl font-extrabold tracking-tight cursor-pointer"
+      onClick={() => navigate("/")}
+    >
+      <span className="text-blue-900">Spot</span>
+      <span className="text-gray-800">Jobs</span>
+    </h1>
+
+    {/* --- Right Side (User Section) --- */}
+    {userData ? (
+      <div className="flex items-center gap-4 text-gray-700 font-medium">
+        <Link
+          to="/applications"
+          className="hover:text-blue-700 transition-none"
         >
-          <span className="text-blue-900">Spot</span>
-          <span className="text-black">Jobs</span>
-        </h1>
-        {user ? (
-          <div className="flex items-center gap-3">
-            <Link to={"/applications"}>Applied Jobs</Link>
-            <p>|</p>
-            <p className="max-sm:hidden">Hi,</p>
-          </div>
-        ) : (
-          <div className="flex gap-4 max-sm:text-sm">
-            <button
-              onClick={(e) => setShowLogin(true)}
-              className="text-gray-600  cursor-pointer"
-            >
-              Register User
-            </button>
-            <button className="bg-blue-600 text-white px-6 sm:px-9 py-2 rounded-full  cursor-pointer">
-              User Login
-            </button>
-          </div>
-        )}
+          Applied Jobs
+        </Link>
+        <span className="text-gray-400">|</span>
+        <p className="max-sm:hidden">Hi, {userData.name || "User"}</p>
+        <Link
+          to="/userDashboard"
+          className="hover:text-blue-700 transition-none">
+          <img className="h-10 w-10 border border-gray-500 rounded-full" src={userData.image} alt="userimage" />
+        </Link>
       </div>
-    </div>
+    ) : (
+      <div className="flex gap-3 max-sm:text-sm">
+        {/* Sign Up Button */}
+        <button
+          onClick={() => {
+            setShowLogin(true);
+            setIsLogin(false);
+          }}
+          className="px-5 py-2 border border-blue-900 text-blue-700 font-medium rounded-full cursor-pointer
+                     bg-white hover:bg-blue-50"
+        >
+          Sign Up
+        </button>
+
+        {/* Sign In Button */}
+        <button
+          onClick={() => {
+            setShowLogin(true);
+            setIsLogin(true);
+          }}
+          className="px-5 py-2 bg-blue-900 text-white font-medium rounded-full cursor-pointer
+                     hover:bg-blue-800"
+        >
+          Sign In
+        </button>
+      </div>
+    )}
+  </div>
+</div>
+
   );
 };
 

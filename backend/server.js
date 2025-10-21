@@ -8,6 +8,7 @@ import "./config/instrument.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import cookieParser from "cookie-parser";
 
 // Initialize Express
 const app = express();
@@ -17,8 +18,12 @@ await connectDB();
 await connectCloudinary();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true, 
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 // Routes
 app.get("/debug-sentry", function mainHandler(req, res) {

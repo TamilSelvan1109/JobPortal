@@ -60,7 +60,8 @@ export const registerUser = async (req, res) => {
     res.cookie("token", token, {
       maxAge: 1 * 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "none",
+      secure: true,
     });
 
     res.status(201).json({
@@ -83,6 +84,7 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password , role} = req.body;
+    
     if (!email || !password) {
       return res
         .status(400)
@@ -114,7 +116,8 @@ export const loginUser = async (req, res) => {
       .cookie("token", token, {
         maxAge: 1 * 24 * 60 * 60 * 1000,
         httpOnly: true,
-        sameSite: "strict",
+        sameSite: "none",
+        secure: true,
       })
       .json({
         success: true,
@@ -165,6 +168,11 @@ export const updateUserProfile = async (req, res) => {
       userData.image = imageUpload.secure_url;
     }
     if (name) userData.name = name;
+    if( userData.role === "Recruiter" && name ){
+      const companyData = await Company.findById( userData.profile.company );
+      companyData.name = name;
+      await companyData.save();
+    }
     if (phone) userData.phone = phone;
     if (bio) userData.profile.bio = bio;
     if (skills)
@@ -184,6 +192,8 @@ export const updateUserProfile = async (req, res) => {
 // Get the user data
 export const getUserData = async (req, res) => {
   const userId = req.id;
+  console.log(req.id);
+  
   try {
     const user = await User.findById(userId);
     if (!user) {

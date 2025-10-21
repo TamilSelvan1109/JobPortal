@@ -1,7 +1,6 @@
 import "quill/dist/quill.snow.css";
 import { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
-import RecruiterLogin from "./components/UserRegister";
 import { AppContext } from "./context/AppContext";
 import AddJob from "./pages/AddJob";
 import Applications from "./pages/Applications";
@@ -12,18 +11,20 @@ import ManageJobs from "./pages/ManageJobs";
 import ViewApplications from "./pages/ViewApplications";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import LoginRegister from "./components/LoginRegister";
+import UserDashboard from "./pages/UserDashboard";
 
 const App = () => {
-  const { showLogin , companyToken} = useContext(AppContext);
+  const { showLogin , companyToken, setShowLogin} = useContext(AppContext);
   return (
     <div>
-      {showLogin && <RecruiterLogin />}
+      {showLogin && <LoginRegister onClose={() => setShowLogin(false)} />}
       <ToastContainer />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/apply-job/:id" element={<ApplyJob />} />
         <Route path="/applications" element={<Applications />} />
+        <Route path="/userDashboard" element={<UserDashboard />} />
         <Route path="/dashboard" element={<Dashboard />}>
         {companyToken ? <>
           <Route path="add-job" element={<AddJob />} />

@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 export const isAuthenticated = async (req, res, next) => {
-  const token = req.headers.token;
+  
+  const { token } = req.cookies;
+
   if (!token) {
     return res.json({ success: false, message: "Not authorized, Login Again" });
   }
@@ -14,9 +17,14 @@ export const isAuthenticated = async (req, res, next) => {
         message: "Token verification failed, Login Again",
       });
     }
-    req.id = decoded.id;
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      return res.json({ success: false, message: "User not found, Login Again" });
+    }
+    req.user = user;
+    req.id = user._id;
     next();
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    res.json({ success: false, message:"Token is invalid or expired, Login Again" });
   }
 };
