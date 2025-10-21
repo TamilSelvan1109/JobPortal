@@ -6,20 +6,27 @@ import {
   getCompanyData,
   getCompanyJobApplicants,
   getCompanyPostedJobs,
+<<<<<<< HEAD
   loginCompany,
   postJob,
   registerCompany,
+=======
+  postJob,
+>>>>>>> 0391c8a (user and company register done)
 } from "../controllers/companyController.js";
 import { isAuthenticated} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+<<<<<<< HEAD
 // Register a company
 router.post("/register", upload.single("image"), registerCompany);
 
 // Company login
 router.post("/login", loginCompany);
 
+=======
+>>>>>>> 0391c8a (user and company register done)
 // Get company data
 router.get("/company", isAuthenticated, getCompanyData);
 
