@@ -1,13 +1,11 @@
-import { useClerk, UserButton, useUser } from "@clerk/clerk-react";
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 
 const Navbar = () => {
-  const { openSignIn } = useClerk();
-  const { user } = useUser();
   const navigate = useNavigate();
-  const { setShowRecruiterLogin } = useContext(AppContext);
+  const { setShowLogin } = useContext(AppContext);
+  const user = null; // Placeholder for user authentication status
 
   return (
     <div className="shadow py-4">
@@ -23,24 +21,18 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <Link to={"/applications"}>Applied Jobs</Link>
             <p>|</p>
-            <p className="max-sm:hidden">
-              Hi, {user.firstName + " " + user.lastName}
-            </p>
-            <UserButton />
+            <p className="max-sm:hidden">Hi,</p>
           </div>
         ) : (
           <div className="flex gap-4 max-sm:text-sm">
             <button
-              onClick={(e) => setShowRecruiterLogin(true)}
+              onClick={(e) => setShowLogin(true)}
               className="text-gray-600  cursor-pointer"
             >
-              Recruiter Login
+              Register User
             </button>
-            <button
-              onClick={(e) => openSignIn()}
-              className="bg-blue-600 text-white px-6 sm:px-9 py-2 rounded-full  cursor-pointer"
-            >
-              Login
+            <button className="bg-blue-600 text-white px-6 sm:px-9 py-2 rounded-full  cursor-pointer">
+              User Login
             </button>
           </div>
         )}

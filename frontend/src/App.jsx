@@ -1,7 +1,7 @@
 import "quill/dist/quill.snow.css";
 import { useContext } from "react";
 import { Route, Routes } from "react-router-dom";
-import RecruiterLogin from "./components/RecruiterLogin";
+import RecruiterLogin from "./components/UserRegister";
 import { AppContext } from "./context/AppContext";
 import AddJob from "./pages/AddJob";
 import Applications from "./pages/Applications";
@@ -15,10 +15,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 
 const App = () => {
-  const { showRecruiterLogin , companyToken} = useContext(AppContext);
+  const { showLogin , companyToken} = useContext(AppContext);
   return (
     <div>
-      {showRecruiterLogin && <RecruiterLogin />}
+      {showLogin && <RecruiterLogin />}
       <ToastContainer />
       <Routes>
         <Route path="/" element={<Home />} />
