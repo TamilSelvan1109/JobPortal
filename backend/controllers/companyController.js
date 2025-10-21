@@ -5,8 +5,6 @@ import Job from "../models/Job.js";
 import JobApplication from "../models/JobApplication.js";
 import generateToken from "../utils/generateToken.js";
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 // Register a new company
 export const registerCompany = async (req, res) => {
   const { name, email, password } = req.body;
@@ -80,10 +78,6 @@ export const loginCompany = async (req, res) => {
   }
 };
 
-=======
->>>>>>> 0391c8a (user and company register done)
-=======
->>>>>>> 0391c8a660681a763f3c968e01f170e4dd1d4420
 // Get company data
 export const getCompanyData = async (req, res) => {
   try {
