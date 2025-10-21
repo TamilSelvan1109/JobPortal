@@ -1,0 +1,49 @@
+import express from "express";
+import upload from "../config/multer.js";
+import {
+  applyForJob,
+  getUserData,
+  getUserJobApplications,
+  loginUser,
+  logoutUser,
+  registerUser,
+  updateUserProfile,
+  updateUserResume,
+} from "../controllers/userController.js";
+import { isAuthenticated } from "../middleware/authMiddleware.js";
+import multer from "multer";
+
+const router = express.Router();
+
+const storage = multer.memoryStorage();
+const uploadResume = multer({ storage: storage });
+
+// Register a user
+router.post("/register", upload.single("image"),  registerUser);
+
+// Login a user
+router.post("/login", loginUser);
+
+// Update user details
+router.post("/profile/update",upload.single("image"), isAuthenticated, updateUserProfile);
+
+// Update user resume
+router.patch(
+  "/profile/update-resume",
+  isAuthenticated,
+  upload.single("resume"),
+  updateUserResume
+);
+
+router.get("/logout", isAuthenticated, logoutUser)
+
+// Get a user data
+router.get("/user", isAuthenticated, getUserData);
+
+// Apply for a job
+router.post("/apply", isAuthenticated, applyForJob);
+
+// Get user applied jobs data
+router.get("/applications", isAuthenticated, getUserJobApplications);
+
+export default router;
