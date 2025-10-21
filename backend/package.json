@@ -11,7 +11,6 @@
     "server": "nodemon server.js"
   },
   "dependencies": {
-    "@clerk/express": "^1.7.37",
     "@sentry/node": "^10.18.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",
@@ -22,7 +21,6 @@
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.1",
     "multer": "^2.0.2",
-    "nodemon": "^3.1.10",
-    "svix": "^1.76.1"
+    "nodemon": "^3.1.10"
   }
 }

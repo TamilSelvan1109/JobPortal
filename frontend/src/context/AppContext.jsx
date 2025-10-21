@@ -1,4 +1,3 @@
-import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -7,8 +6,9 @@ export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const { user } = useUser();
-  const { getToken } = useAuth();
+
+  const user = null;
+  const getToken = null; // Placeholder for token retrieval function
 
   const [searchFilter, setSearchFilter] = useState({
     title: "",
@@ -19,7 +19,7 @@ export const AppContextProvider = (props) => {
 
   const [jobs, setJobs] = useState([]);
 
-  const [showRecruiterLogin, setShowRecruiterLogin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   const [companyToken, setCompanyToken] = useState(null);
 
@@ -111,8 +111,8 @@ export const AppContextProvider = (props) => {
     setIsSearched,
     jobs,
     setJobs,
-    showRecruiterLogin,
-    setShowRecruiterLogin,
+    showLogin,
+    setShowLogin,
     companyToken,
     setCompanyToken,
     companyData,

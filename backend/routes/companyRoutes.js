@@ -10,7 +10,7 @@ import {
   postJob,
   registerCompany,
 } from "../controllers/companyController.js";
-import { protectCompany } from "../middleware/authMiddleware.js";
+import { isAuthenticated} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -21,21 +21,21 @@ router.post("/register", upload.single("image"), registerCompany);
 router.post("/login", loginCompany);
 
 // Get company data
-router.get("/company", protectCompany, getCompanyData);
+router.get("/company", isAuthenticated, getCompanyData);
 
 // Post a job
-router.post("/post-job", protectCompany, postJob);
+router.post("/post-job", isAuthenticated, postJob);
 
 // Get applicants data of company
-router.get("/applicants", protectCompany, getCompanyJobApplicants);
+router.get("/applicants", isAuthenticated, getCompanyJobApplicants);
 
 // Get company job list
-router.get("/list-jobs", protectCompany, getCompanyPostedJobs);
+router.get("/list-jobs", isAuthenticated, getCompanyPostedJobs);
 
 // Change application status
-router.post("/change-status", protectCompany, changeJobApllicationStatus);
+router.post("/change-status", isAuthenticated, changeJobApllicationStatus);
 
 // Change application visiblity
-router.post("/change-visiblity", protectCompany, changeJobVisiblty);
+router.post("/change-visiblity", isAuthenticated, changeJobVisiblty);
 
 export default router;
