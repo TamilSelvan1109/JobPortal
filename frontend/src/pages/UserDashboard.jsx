@@ -1,103 +1,104 @@
-import React, { useState } from "react";
-import { Mail, Phone, Briefcase, FileText, Code2, Camera } from "lucide-react";
+import React, { useContext, useState } from "react";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
+import axios from "axios";
+import { toast } from "react-toastify";
 
-export default function UserDashboard() {
-  const [userData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
-    role: "Frontend Developer",
-    bio: "Passionate developer with 5+ years of experience building scalable web applications using React, Node.js, and modern UI frameworks.",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
-    skills: ["React", "JavaScript", "Node.js"],
-    resumeName: "John_Doe_Resume.pdf",
-  });
+const UserDashboard=()=> {
+  
+  const { userData , setUserData, backendUrl} = useContext(AppContext)
+  
+  const navigate = useNavigate();
+
+  const logout = async() => {
+    try{
+      const {data} = await axios.get(`${backendUrl}/api/users/logout`, { withCredentials: true });
+      if(!data.success){
+        return toast.error(data.message);
+      }
+      toast.success("Logged out successfully");
+      setUserData(null);
+      window.location.href = "/";
+    }catch(error){
+      toast.error(error.message);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-blue-900 text-gray-100 flex items-center justify-center p-6">
-      <div className="max-w-5xl w-full bg-black rounded-2xl shadow-lg p-8 flex flex-col md:flex-row items-center gap-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* --- Navbar for User Panel (from sample) --- */}
+      <div className="shadow py-4 bg-white">
+        <div className="px-5 flex justify-between items-center">
+          <h1
+            className="text-3xl font-extrabold cursor-pointer max-sm:w-32"
+            onClick={() => navigate("/")}
+          >
+            <span className="text-blue-900">Spot</span>
+            <span className="text-black">Jobs</span>
+          </h1>
+
+          {userData && (
+            <div className="flex items-center gap-3">
+              <p className="max-sm:hidden font-medium text-gray-700">Welcome, {userData.name}</p>
+              <div className="relative group">
+                <img
+                  className="w-10 h-10 rounded-full border-2 border-blue-800 object-cover"
+                  src={userData.image}
+                  alt="User Avatar"
+                />
+                <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
+                  <ul className="list-none m-0 p-2 bg-white border border-gray-400 rounded-md text-sm">
+                    <li
+                      className="py-1 px-2 cursor-pointer pr-5 hover:bg-gray-100"
+                      onClick={logout}
+                    >
+                      Logout
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-start">
+        {/* --- Left Sidebar (from sample) --- */}
+        <div className="sticky top-0 inline-block min-h-screen border-r-2 border-gray-200 bg-white">
+          <ul className="flex flex-col items-start pt-4 text-gray-800">
+            <NavLink
+              className={({ isActive }) =>
+                `flex items-center p-3 sm:px-6 gap-3 w-full hover:bg-gray-100 ${
+                  isActive ? `bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold` : ''
+                }`
+              }
+              to={"/userDashboard/profile"}
+            >
+              {/* <UserCircle className="w-5 h-5"/> */}
+              <p className="max-sm:hidden">My Profile</p>
+            </NavLink>
+            <NavLink
+              className={({ isActive }) =>
+                `flex items-center p-3 sm:px-6 gap-3 w-full hover:bg-gray-100 ${
+                  isActive ? `bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold` : ''
+                }`
+              }
+              to={"/userDashboard/editUser"}
+            >
+              {/* <FileText className="w-5 h-5" /> */}
+              <p className="max-sm:hidden">Edit Details</p>
+            </NavLink>
+          </ul>
+        </div>
+      
+       <div>
+          <Outlet/>
+        </div>
         
-        {/* --- LEFT: Avatar Section --- */}
-        <div className="flex flex-col items-center md:w-1/3">
-          <div className="relative">
-            <img
-              src={userData.avatarUrl}
-              alt="User Avatar"
-              className="w-40 h-40 rounded-full border-4 border-blue-600 object-cover shadow-md"
-            />
-            <div className="absolute bottom-2 right-2 bg-blue-600 p-2 rounded-full cursor-pointer hover:bg-blue-700">
-              <Camera className="w-4 h-4 text-white" />
-            </div>
-          </div>
-          <h2 className="text-2xl font-semibold mt-4">{userData.name}</h2>
-          <p className="text-gray-400">{userData.role}</p>
-        </div>
-
-        {/* --- RIGHT: User Info Section --- */}
-        <div className="flex-1 w-full space-y-6">
-          
-          {/* Bio */}
-          <div>
-            <h3 className="text-lg font-semibold text-blue-400 mb-1">About</h3>
-            <p className="text-gray-300 leading-relaxed">{userData.bio}</p>
-          </div>
-
-          {/* Contact Info */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 bg-blue-950/50 p-3 rounded-lg border border-blue-800">
-              <Mail className="w-5 h-5 text-blue-400" />
-              <div>
-                <p className="text-xs text-gray-400">Email</p>
-                <p className="font-medium">{userData.email}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 bg-blue-950/50 p-3 rounded-lg border border-blue-800">
-              <Phone className="w-5 h-5 text-blue-400" />
-              <div>
-                <p className="text-xs text-gray-400">Phone</p>
-                <p className="font-medium">{userData.phone}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 bg-blue-950/50 p-3 rounded-lg border border-blue-800">
-              <Briefcase className="w-5 h-5 text-blue-400" />
-              <div>
-                <p className="text-xs text-gray-400">Role</p>
-                <p className="font-medium">{userData.role}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 bg-blue-950/50 p-3 rounded-lg border border-blue-800">
-              <FileText className="w-5 h-5 text-blue-400" />
-              <div>
-                <p className="text-xs text-gray-400">Resume</p>
-                <p className="font-medium">{userData.resumeName}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Skills */}
-          <div>
-            <h3 className="text-lg font-semibold text-blue-400 mb-2 flex items-center gap-2">
-              <Code2 className="w-5 h-5 text-blue-400" />
-              Skills
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {userData.skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="bg-blue-800 text-blue-100 px-3 py-1 rounded-full text-sm"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
-
-        </div>
       </div>
     </div>
   );
-}
+};
+
+
+export default UserDashboard;

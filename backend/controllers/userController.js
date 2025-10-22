@@ -141,10 +141,11 @@ export const logoutUser = async (req, res) => {
   try {
     res
       .status(200)
-      .cookie("token", "", {
-        maxAge: 0,
+      .clearCookie("token", {
         httpOnly: true,
-        sameSite: "strict",
+        path: "/",
+        sameSite: "none",
+        secure: true,
       })
       .json({ success: true, message: "Logged out successfully" });
   } catch (error) {
@@ -156,9 +157,11 @@ export const logoutUser = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.id;
-    const { name, phone, bio, skills } = req.body;
-    const profileImage = req.file || null;
+    const { name, phone, bio, skills} = req.body;
+    const profileImage = req.files ? req.files['image'] ? req.files['image'][0] : null : null;
+    const resumeFile = req.files ? req.files['resume'] ? req.files['resume'][0] : null : null;
     const userData = await User.findById(userId);
+
     if(!userData){
       return res.status(400).json({success:false, message:"User not found!"})
     }
@@ -167,16 +170,28 @@ export const updateUserProfile = async (req, res) => {
       const imageUpload = await cloudinary.uploader.upload(profileImage.path);
       userData.image = imageUpload.secure_url;
     }
+    
+    if (resumeFile) {
+      const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
+      userData.profile.resume = resumeUpload.secure_url;
+    }
+    
     if (name) userData.name = name;
+    
     if( userData.role === "Recruiter" && name ){
       const companyData = await Company.findById( userData.profile.company );
       companyData.name = name;
       await companyData.save();
     }
+    
     if (phone) userData.phone = phone;
+    
     if (bio) userData.profile.bio = bio;
-    if (skills)
+    
+    if (skills){
       userData.profile.skills = skills.split(",").map((skill) => skill.trim());
+    }
+    
     await userData.save();
 
     return res.json({
