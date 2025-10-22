@@ -13,9 +13,11 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import LoginRegister from "./components/LoginRegister";
 import UserDashboard from "./pages/UserDashboard";
+import UpdateUser from "./pages/UpdateUser";
+import UserProfile from "./pages/UserProfile";
 
 const App = () => {
-  const { showLogin , companyToken, setShowLogin} = useContext(AppContext);
+  const { showLogin , companyToken, setShowLogin, userData} = useContext(AppContext);
   return (
     <div>
       {showLogin && <LoginRegister onClose={() => setShowLogin(false)} />}
@@ -24,7 +26,12 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/apply-job/:id" element={<ApplyJob />} />
         <Route path="/applications" element={<Applications />} />
-        <Route path="/userDashboard" element={<UserDashboard />} />
+        <Route path="/userDashboard" element={<UserDashboard />} >
+        {userData ? <>
+          <Route path="profile" element={<UserProfile />} />
+          <Route path="editUser" element={<UpdateUser />} />
+        </> : null}
+        </Route>
         <Route path="/dashboard" element={<Dashboard />}>
         {companyToken ? <>
           <Route path="add-job" element={<AddJob />} />

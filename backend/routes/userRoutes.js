@@ -25,7 +25,10 @@ router.post("/register", upload.single("image"),  registerUser);
 router.post("/login", loginUser);
 
 // Update user details
-router.post("/profile/update",upload.single("image"), isAuthenticated, updateUserProfile);
+router.post("/profile/update", upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "resume", maxCount: 1 },
+  ]), isAuthenticated, updateUserProfile);
 
 // Update user resume
 router.patch(
