@@ -19,9 +19,10 @@ await connectCloudinary();
 
 // Middlewares
 app.use(cors({
-  origin: "http://localhost:5173", 
-  credentials: true, 
+  origin: ["http://localhost:5173"],
+  credentials: true,
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -38,10 +39,4 @@ app.use("/api/jobs", jobRoutes);
 const PORT = process.env.PORT || 5000;
 Sentry.setupExpressErrorHandler(app);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
+app.listen(5000, "0.0.0.0", () => console.log("Server running..."));

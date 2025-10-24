@@ -6,25 +6,25 @@ export const isAuthenticated = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (!token) {
-    return res.json({ success: false, message: "Not authorized, Login Again" });
+    return res.status(401).json({ success: false, message: "Not authorized, Login Again" });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded) {
-      return res.json({
+      return res.status(401).json({
         success: false,
         message: "Token verification failed, Login Again",
       });
     }
     const user = await User.findById(decoded.id).select("-password");
     if (!user) {
-      return res.json({ success: false, message: "User not found, Login Again" });
+      return res.status(401).json({ success: false, message: "User not found, Login Again" });
     }
     req.user = user;
     req.id = user._id;
     next();
   } catch (error) {
-    res.json({ success: false, message:"Token is invalid or expired, Login Again" });
+    res.status(401).json({ success: false, message:"Token is invalid or expired, Login Again" });
   }
 };

@@ -26,19 +26,19 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/apply-job/:id" element={<ApplyJob />} />
         <Route path="/applications" element={<Applications />} />
-        <Route path="/userDashboard" element={<UserDashboard />} >
-        {userData ? <>
-          <Route path="profile" element={<UserProfile />} />
-          <Route path="editUser" element={<UpdateUser />} />
-        </> : null}
+        {userData && (
+        <Route path="/user-dashboard" element={<UserDashboard />} >
+            <Route path="profile" element={<UserProfile />} />
+            <Route path="edit-user" element={<UpdateUser />} />
         </Route>
-        <Route path="/dashboard" element={<Dashboard />}>
-        {companyToken ? <>
-          <Route path="add-job" element={<AddJob />} />
-          <Route path="manage-jobs" element={<ManageJobs />} />
-          <Route path="view-applications" element={<ViewApplications />} />
-        </> : null}
+        )}
+        {companyToken && (
+        <Route path="/company-dashboard" element={<Dashboard />}>
+            <Route path="add-job" element={<AddJob />} />
+            <Route path="manage-jobs" element={<ManageJobs />} />
+            <Route path="view-applications" element={<ViewApplications />} />
         </Route>
+        )}
       </Routes>
     </div>
   );

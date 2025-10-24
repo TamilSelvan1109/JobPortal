@@ -1,17 +1,14 @@
 import bcrypt from "bcrypt";
 import { v2 as cloudinary } from "cloudinary";
-import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
+import Company from "../models/Company.js";
 import Job from "../models/Job.js";
 import JobApplication from "../models/JobApplication.js";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
-import Company from "../models/Company.js";
 
 // Register a new user
 export const registerUser = async (req, res) => {
   try {
-
     const { name, email, phone, password, role } = req.body;
     const profileImage = req.file;
 
@@ -33,10 +30,10 @@ export const registerUser = async (req, res) => {
     const imageUpload = await cloudinary.uploader.upload(profileImage.path);
     let companyId = null;
 
-    if(role==="Recruiter"){
+    if (role === "Recruiter") {
       const newCompany = await Company.create({
         name,
-        contactEmail:email,
+        contactEmail: email,
         image: imageUpload.secure_url,
       });
 
@@ -50,13 +47,13 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
       role,
       image: imageUpload.secure_url,
-      profile:{
-        company:companyId
-      }
+      profile: {
+        company: companyId,
+      },
     });
-    
+
     const token = generateToken(newUser._id);
-    
+
     res.cookie("token", token, {
       maxAge: 1 * 24 * 60 * 60 * 1000,
       httpOnly: true,
@@ -73,7 +70,7 @@ export const registerUser = async (req, res) => {
         phone: newUser.phone,
         role: newUser.role,
         image: newUser.image,
-      }
+      },
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -83,8 +80,8 @@ export const registerUser = async (req, res) => {
 // User login
 export const loginUser = async (req, res) => {
   try {
-    const { email, password , role} = req.body;
-    
+    const { email, password, role } = req.body;
+
     if (!email || !password) {
       return res
         .status(400)
@@ -129,7 +126,7 @@ export const loginUser = async (req, res) => {
           phone: user.phone,
           role: user.role,
           image: user.image,
-        }
+        },
       });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
@@ -157,41 +154,42 @@ export const logoutUser = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.id;
-    const { name, phone, bio, skills} = req.body;
-    const profileImage = req.files ? req.files['image'] ? req.files['image'][0] : null : null;
-    const resumeFile = req.files ? req.files['resume'] ? req.files['resume'][0] : null : null;
+    const { name, phone, bio, skills } = req.body;
+    const profileImage = req.file;
+    
     const userData = await User.findById(userId);
 
-    if(!userData){
-      return res.status(400).json({success:false, message:"User not found!"})
+    if (!userData) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User not found!" });
     }
 
     if (profileImage) {
       const imageUpload = await cloudinary.uploader.upload(profileImage.path);
       userData.image = imageUpload.secure_url;
     }
-    
-    if (resumeFile) {
-      const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
-      userData.profile.resume = resumeUpload.secure_url;
-    }
-    
+
     if (name) userData.name = name;
-    
-    if( userData.role === "Recruiter" && name ){
-      const companyData = await Company.findById( userData.profile.company );
+
+    if (userData.role === "Recruiter" && name) {
+      const companyData = await Company.findById(userData.profile.company);
       companyData.name = name;
       await companyData.save();
     }
-    
+
     if (phone) userData.phone = phone;
-    
+
     if (bio) userData.profile.bio = bio;
-    
-    if (skills){
+
+    if (skills) {
       userData.profile.skills = skills.split(",").map((skill) => skill.trim());
     }
-    
+
+    if(role){
+      userData.profile.role = role;
+    }
+
     await userData.save();
 
     return res.json({
@@ -206,17 +204,21 @@ export const updateUserProfile = async (req, res) => {
 
 // Get the user data
 export const getUserData = async (req, res) => {
-  const userId = req.id;
-  console.log(req.id);
-  
   try {
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.json({ success: false, message: "User Not Found" });
+    const userId = req.id;
+    if(!userId){
+      return res.status(401).json({ success: false, message: "User Not Authorized" });
     }
-    res.json({ success: true, user });
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found" });
+    }
+    res.status(200).json({ success: true, user });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -278,12 +280,18 @@ export const updateUserResume = async (req, res) => {
     const resumeFile = req.file;
     const userData = await User.findById(userId);
     if (!resumeFile) {
-      return res.status(400).json({success:false, message:"Upload resume!"})
+      return res
+        .status(400)
+        .json({ success: false, message: "Upload resume!" });
     }
     const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
     userData.profile.resume = resumeUpload.secure_url;
     await userData.save();
-    return res.json({ success: true, message: "Resume Updated", user:userData });
+    return res.json({
+      success: true,
+      message: "Resume Updated",
+      user: userData,
+    });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }

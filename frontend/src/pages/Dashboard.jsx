@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (companyData) {
-      navigate("/dashboard/manage-jobs");
+      navigate("/company-dashboard/manage-jobs");
     }
   }, [companyData]);
 
@@ -74,7 +74,7 @@ const Dashboard = () => {
                   isActive && `bg-blue-100 border-r-4 border-blue-900`
                 }`
               }
-              to={"/dashboard/add-job"}
+              to={"/company-dashboard/add-job"}
             >
               <img className="min-w-4" src={assets.add_icon} alt="" />
               <p className="max-sm:hidden">Add Job</p>
@@ -85,7 +85,7 @@ const Dashboard = () => {
                   isActive && `bg-blue-100 border-r-4 border-blue-900`
                 }`
               }
-              to={"/dashboard/manage-jobs"}
+              to={"/company-dashboard/manage-jobs"}
             >
               <img className="min-w-4" src={assets.home_icon} alt="" />
               <p className="max-sm:hidden">Manage Jobs</p>
@@ -96,7 +96,7 @@ const Dashboard = () => {
                   isActive && `bg-blue-100 border-r-4 border-blue-900`
                 }`
               }
-              to={"/dashboard/view-applications"}
+              to={"/company-dashboard/view-applications"}
             >
               <img className="min-w-4" src={assets.person_tick_icon} alt="" />
               <p className="max-sm:hidden">View Applications</p>

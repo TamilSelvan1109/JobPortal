@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
@@ -23,6 +23,14 @@ const UserDashboard=()=> {
       toast.error(error.message);
     }
   }
+
+    useEffect(() => {
+  if (userData) {
+    navigate("/user-dashboard/profile");
+  }
+}, [userData]);
+
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,7 +57,7 @@ const UserDashboard=()=> {
                 <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
                   <ul className="list-none m-0 p-2 bg-white border border-gray-400 rounded-md text-sm">
                     <li
-                      className="py-1 px-2 cursor-pointer pr-5 hover:bg-gray-100"
+                      className="py-1 px-4 text-lg cursor-pointer pr-5 text-red-600 hover:text-white hover:bg-red-300"
                       onClick={logout}
                     >
                       Logout
@@ -72,7 +80,7 @@ const UserDashboard=()=> {
                   isActive ? `bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold` : ''
                 }`
               }
-              to={"/userDashboard/profile"}
+              to={"/user-dashboard/profile"}
             >
               {/* <UserCircle className="w-5 h-5"/> */}
               <p className="max-sm:hidden">My Profile</p>
@@ -83,7 +91,7 @@ const UserDashboard=()=> {
                   isActive ? `bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold` : ''
                 }`
               }
-              to={"/userDashboard/editUser"}
+              to={"/user-dashboard/edit-user"}
             >
               {/* <FileText className="w-5 h-5" /> */}
               <p className="max-sm:hidden">Edit Details</p>

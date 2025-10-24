@@ -1,4 +1,5 @@
 import express from "express";
+import multer from "multer";
 import upload from "../config/multer.js";
 import {
   applyForJob,
@@ -11,7 +12,6 @@ import {
   updateUserResume,
 } from "../controllers/userController.js";
 import { isAuthenticated } from "../middleware/authMiddleware.js";
-import multer from "multer";
 
 const router = express.Router();
 
@@ -19,16 +19,18 @@ const storage = multer.memoryStorage();
 const uploadResume = multer({ storage: storage });
 
 // Register a user
-router.post("/register", upload.single("image"),  registerUser);
+router.post("/register", upload.single("image"), registerUser);
 
 // Login a user
 router.post("/login", loginUser);
 
 // Update user details
-router.post("/profile/update", upload.fields([
-    { name: "image", maxCount: 1 },
-    { name: "resume", maxCount: 1 },
-  ]), isAuthenticated, updateUserProfile);
+router.post(
+  "/profile/update",
+  isAuthenticated,
+  upload.single("image"),
+  updateUserProfile
+);
 
 // Update user resume
 router.patch(
@@ -38,7 +40,7 @@ router.patch(
   updateUserResume
 );
 
-router.get("/logout", isAuthenticated, logoutUser)
+router.get("/logout", isAuthenticated, logoutUser);
 
 // Get a user data
 router.get("/user", isAuthenticated, getUserData);

@@ -38,16 +38,19 @@ export const AppContextProvider = (props) => {
       const {data} = await axios.get(`${backendUrl}/api/users/user`,{
         withCredentials: true,
       })
-      console.log(data);
-      
+
       if(data.success){
         setUserData(data.user);
         console.log(data.user);
-      } else {
-        toast.error(data.message);
       }
+
     } catch (error) {
-      toast.error(error.message);
+      if(error.response && error.response.status === 401){
+        setUserData(null);
+        console.log("User not authorized");
+      }else{
+        toast.error(error.message);
+      }
     }
   };
 
@@ -87,13 +90,8 @@ export const AppContextProvider = (props) => {
           await fetchJobs();
           await fetchUserData(); 
       };
-      
-      initialize();
 
-      const storedCompanyToken = localStorage.getItem("companyToken");
-      if (storedCompanyToken) {
-        setCompanyToken(storedCompanyToken);
-      }
+      initialize();
     }, []);
 
   useEffect(() => {
