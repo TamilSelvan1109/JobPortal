@@ -1,17 +1,17 @@
 import axios from "axios";
-import React, { useContext, useState } from "react";
-import { toast } from "react-toastify";
-import { AppContext } from "../context/AppContext";
 import {
-  Mail,
-  LockKeyhole,
-  User,
-  Phone,
-  X,
+  Building,
   Camera,
   Loader2,
-  Building,
+  LockKeyhole,
+  Mail,
+  Phone,
+  User,
+  X,
 } from "lucide-react";
+import { useContext, useState } from "react";
+import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext";
 
 // Redesigned InputField to accept an icon
 const InputField = ({ icon, ...props }) => (
@@ -69,9 +69,8 @@ const LoginRegister = ({ onClose }) => {
         if (res.data.success) {
           setUserData(res.data.user);
           toast.success("Logged in successfully!");
-          onClose(); // Use onClose prop instead of setShowLogin
+          onClose();
         } else {
-          // Handle cases where success might be false but no error was thrown
           toast.error(res.data.message || "Login failed. Please try again.");
         }
       } else {
@@ -93,7 +92,7 @@ const LoginRegister = ({ onClose }) => {
         await axios.post(`${backendUrl}/api/Users/register`, formData, {
           withCredentials: true,
         });
-        
+
         // REPLACED alert with toast
         toast.success("Registration successful! Please log in.");
         setIsLogin(true);
@@ -302,23 +301,16 @@ const LoginRegister = ({ onClose }) => {
   );
 
   return (
-    // This is the Modal Backdrop, which creates the "pop-up" effect.
-    // `fixed inset-0`: Covers the whole screen.
-    // `z-50`: Sits on top of other content.
-    // `bg-black/70`: Dark, translucent background. (Cleaner than bg-opacity-900)
-    // `backdrop-blur-sm`: This is the "blur outside view" you wanted.
     <div
       onClick={onClose}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
     >
-      {/* This is the Modal Content. e.stopPropagation() stops a click inside from closing the modal. */}
       <div
         onClick={(e) => e.stopPropagation()}
         className={`bg-white text-black shadow-2xl rounded-2xl p-8 md:p-12 transition-all duration-300 w-full relative ${
           isLogin ? "max-w-md" : "max-w-4xl"
         }`}
       >
-        {/* Redesigned Close Button */}
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-gray-400 hover:text-gray-800 transition-colors"

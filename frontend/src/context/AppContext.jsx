@@ -1,5 +1,4 @@
 import axios from "axios";
-import { use } from "react";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -8,53 +7,22 @@ export const AppContext = createContext();
 export const AppContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-  const user = null;
-  const getToken = null; // Placeholder for token retrieval function
-
   const [searchFilter, setSearchFilter] = useState({
     title: "",
     location: "",
   });
-
   const [isSearched, setIsSearched] = useState(false);
-
   const [jobs, setJobs] = useState([]);
-
   const [showLogin, setShowLogin] = useState(false);
-
   const [isLogin, setIsLogin] = useState(true);
 
-  const [companyToken, setCompanyToken] = useState(null);
-
   const [companyData, setCompanyData] = useState(null);
-
   const [userData, setUserData] = useState(null);
-
   const [userApplications, setUserApplications] = useState([]);
+  const [jobsApplied, setJobsApplied] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Function to fetch user data
-  const fetchUserData = async () => {
-    try {
-      const {data} = await axios.get(`${backendUrl}/api/users/user`,{
-        withCredentials: true,
-      })
-
-      if(data.success){
-        setUserData(data.user);
-        console.log(data.user);
-      }
-
-    } catch (error) {
-      if(error.response && error.response.status === 401){
-        setUserData(null);
-        console.log("User not authorized");
-      }else{
-        toast.error(error.message);
-      }
-    }
-  };
-
-  // Function to fetch jobs from backend
+  // Fetch all jobs
   const fetchJobs = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/jobs`);
@@ -68,15 +36,43 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  // Function to fetch company data using token
+  // Fetch logged-in user data (from cookie)
+  const fetchUserData = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/users/user`, {
+        withCredentials: true,
+      });
+
+      if (data.success) {
+        setUserData(data.user);
+
+        if (data.user.role === "Recruiter") {
+          await fetchCompanyData();
+        }
+
+        console.log("Fetched user:", data.user);
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        setUserData(null);
+        setCompanyData(null);
+        console.log("User not authorized");
+      } else {
+        toast.error(error.message);
+      }
+    }
+  };
+
+  // Fetch company data (for recruiters)
   const fetchCompanyData = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/company/company`, {
-        headers: { token: companyToken },
+        withCredentials: true, // since you use cookie-based auth
       });
+
       if (data.success) {
         setCompanyData(data.company);
-        console.log(data);
+        console.log("Fetched company:", data.company);
       } else {
         toast.error(data.message);
       }
@@ -85,23 +81,44 @@ export const AppContextProvider = (props) => {
     }
   };
 
-  useEffect(() => {
-      const initialize = async () => {
-          await fetchJobs();
-          await fetchUserData(); 
-      };
+  const fetchAppliedJobs = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/users/applications`, {
+        withCredentials: true,
+      });
 
-      initialize();
-    }, []);
-
-  useEffect(() => {
-      if (companyToken) {
-        fetchCompanyData();
+      if (!data.success) {
+        toast.error(data.message);
+      } else {
+        setJobsApplied(data.applications);
       }
-  }, [companyToken]);
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  };
 
+  // Initialize on mount
+  useEffect(() => {
+    const initialize = async () => {
+      await fetchJobs();
+      await fetchUserData();
+      setIsLoading(false);
+    };
+    initialize();
+  }, [backendUrl]);
 
+  useEffect(() => {
+    const initialize = async () => {
+      if (userData && userData.role === "User") {
+        await fetchAppliedJobs();
+      }
+    };
+    initialize();
+  }, [userData]);
+
+  // Context values
   const value = {
+    backendUrl,
     searchFilter,
     setSearchFilter,
     isSearched,
@@ -110,19 +127,27 @@ export const AppContextProvider = (props) => {
     setJobs,
     showLogin,
     setShowLogin,
-    companyToken,
-    setCompanyToken,
-    companyData,
-    setCompanyData,
-    backendUrl,
     isLogin,
     setIsLogin,
-    fetchUserData,
+    isLoading,
+
+    // user & recruiter info
     userData,
     setUserData,
+    companyData,
+    setCompanyData,
     userApplications,
     setUserApplications,
+    jobsApplied,
+    setJobsApplied,
+
+    // fetchers
+    fetchUserData,
+    fetchCompanyData,
+    fetchJobs,
+    fetchAppliedJobs,
   };
+
   return (
     <AppContext.Provider value={value}>{props.children}</AppContext.Provider>
   );

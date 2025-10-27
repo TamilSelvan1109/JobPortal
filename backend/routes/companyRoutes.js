@@ -1,14 +1,14 @@
 import express from "express";
-import upload from "../config/multer.js";
 import {
   changeJobApllicationStatus,
   changeJobVisiblty,
+  getApplicantsByJobId,
   getCompanyData,
   getCompanyJobApplicants,
   getCompanyPostedJobs,
   postJob,
 } from "../controllers/companyController.js";
-import { isAuthenticated} from "../middleware/authMiddleware.js";
+import { isAuthenticated } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -25,9 +25,12 @@ router.get("/applicants", isAuthenticated, getCompanyJobApplicants);
 router.get("/list-jobs", isAuthenticated, getCompanyPostedJobs);
 
 // Change application status
-router.post("/change-status", isAuthenticated, changeJobApllicationStatus);
+router.put("/change-status", isAuthenticated, changeJobApllicationStatus);
 
 // Change application visiblity
 router.post("/change-visiblity", isAuthenticated, changeJobVisiblty);
+
+// Get a applicants for a specified job
+router.get("/job-applicants/:jobId", isAuthenticated, getApplicantsByJobId);
 
 export default router;

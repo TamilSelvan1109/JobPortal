@@ -1,6 +1,6 @@
 import axios from "axios";
 import {
-  Camera, // Used this icon
+  Camera,
   Edit,
   Eye,
   FileText,
@@ -19,18 +19,22 @@ import { AppContext } from "../context/AppContext";
 
 const UpdateUser = () => {
   const { userData, backendUrl, setUserData } = useContext(AppContext);
+
+  // UI states
   const [isEdit, setIsEdit] = useState(false);
 
-  const [resumeUrl, setResumeUrl] = useState(null);
-  const [newResumeFile, setNewResumeFile] = useState(null);
-
+  // Profile data
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [skills, setSkills] = useState("");
-  const [role, setRole] = useState("")
+  const [role, setRole] = useState("");
+
+  // Resume data
+  const [resumeUrl, setResumeUrl] = useState(null);
+  const [newResumeFile, setNewResumeFile] = useState(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -40,15 +44,9 @@ const UpdateUser = () => {
     }
   };
 
-  const handleResumeClick = (e) => {
-    if (!resumeUrl) {
-      e.preventDefault();
-      toast.error("No resume uploaded!");
-    }
-  };
-
-  const handleUpdateUser = async (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
+
     try {
       const formData = new FormData();
       formData.append("name", name);
@@ -56,60 +54,52 @@ const UpdateUser = () => {
       formData.append("bio", bio);
       formData.append("skills", skills);
       formData.append("role", role);
-      if (image) {
-        formData.append("image", image);
-      }
+      if (image) formData.append("image", image);
 
       const { data } = await axios.post(
         `${backendUrl}/api/users/profile/update`,
         formData,
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
 
       if (data.success) {
-        toast.success("Profile updated successfully!");
         setUserData(data.user);
+        toast.success("Profile updated successfully!");
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Update failed.");
       }
     } catch (error) {
-      toast.error("Failed to update profile. Please try again.");
-      return;
+      toast.error("Failed to update profile.");
     }
   };
 
   const handleUpdateResume = async (e) => {
     e.preventDefault();
-    
     if (!newResumeFile) {
-      toast.error("Please select a new resume file to upload.");
+      toast.error("Please select a resume file.");
       return;
     }
 
     try {
-      const formdata = new FormData();
-      formdata.append("resume", newResumeFile); 
+      const formData = new FormData();
+      formData.append("resume", newResumeFile);
 
       const { data } = await axios.patch(
         `${backendUrl}/api/users/profile/update-resume`,
-        formdata,
-        {
-          withCredentials: true,
-        }
+        formData,
+        { withCredentials: true }
       );
 
       if (data.success) {
-        toast.success("Resume updated successfully!");
         setUserData(data.user);
         setIsEdit(false);
         setNewResumeFile(null);
+        toast.success("Resume updated successfully!");
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to upload resume.");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error("⚠️ Resume upload failed.");
     }
   };
 
@@ -118,157 +108,131 @@ const UpdateUser = () => {
       setName(userData.name || "");
       setPhone(userData.phone || "");
       setImagePreview(userData.image || "");
-
       if (userData.profile) {
-        setResumeUrl(userData.profile.resume || null);
         setBio(userData.profile.bio || "");
         setRole(userData.profile.role || "");
-        setSkills(
-          userData.profile.skills ? userData.profile.skills.join(", ") : ""
-        );
+        setResumeUrl(userData.profile.resume || null);
+        setSkills(userData.profile.skills?.join(", ") || "");
       }
     }
   }, [userData]);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-8 space-y-8">
+    <div className="max-w-5xl mx-auto p-4 sm:p-8 space-y-10">
+      {/* Profile Section */}
       <form
-        className="bg-white p-6 sm:p-8 rounded-xl shadow-lg"
-        onSubmit={handleUpdateUser}
+        onSubmit={handleUpdateProfile}
+        className="bg-white p-8 rounded-xl shadow-md space-y-8"
       >
-        <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-4 flex items-center gap-3">
-          <UserCog size={30} className="text-blue-600" />
+        <h2 className="text-2xl font-bold text-gray-800 border-b pb-4 flex items-center gap-3">
+          <UserCog className="text-blue-600" size={26} />
           Profile Details
         </h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="flex flex-col items-center lg:items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Profile Image */}
+          <div className="flex flex-col items-center">
             <label htmlFor="profileImage" className="cursor-pointer group">
-              <div className="w-40 h-40 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50 text-gray-400 relative overflow-hidden group-hover:border-blue-500 transition">
-  
-                {/* Changed to truthy check and used Camera icon */}
+              <div className="relative w-40 h-40 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 transition group-hover:border-blue-500">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-full rounded-full object-cover"
+                    alt="Profile"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
-                  <Camera size={64} className="text-gray-300" />
+                  <Camera size={60} className="text-gray-300" />
                 )}
-                <div className="absolute inset-0 bg-opacity-0 group-hover:bg-opacity-70 flex flex-col items-center justify-center transition">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/0 group-hover:bg-black/40 transition">
                   <Edit
-                    size={32}
-                    className="text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity"
+                    size={26}
+                    className="text-white opacity-0 group-hover:opacity-100"
                   />
-                  <span className="text-blue-900 opacity-0 group-hover:opacity-100 transition-opacity text-sm mt-1">
+                  <span className="text-xs text-white mt-1 opacity-0 group-hover:opacity-100">
                     Change
                   </span>
                 </div>
               </div>
               <input
-                type="file"
                 id="profileImage"
-                className="hidden"
+                type="file"
                 accept="image/*"
                 onChange={handleImageChange}
+                className="hidden"
               />
             </label>
           </div>
 
-          {/* Right Column – Inputs */}
+          {/* Profile Fields */}
           <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="sm:col-span-1">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"
-              >
-                <User size={16} className="text-gray-500" />
+            <div>
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <User size={16} />
                 Name
               </label>
               <input
-                id="name"
-                type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) => setName(e.target.value)}
                 value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md p-2.5 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            <div className="sm:col-span-1">
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"
-              >
-                <Phone size={16} className="text-gray-500" />
+            <div>
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Phone size={16} />
                 Phone
               </label>
               <input
-                id="phone"
-                type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) => setPhone(e.target.value)}
                 value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md p-2.5 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label
-                htmlFor="bio"
-                className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"
-              >
-                <NotebookPen size={16} className="text-gray-500" />
-                Bio
-              </label>
-              <textarea
-                id="bio"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"
-                rows="3"
-                onChange={(e) => setBio(e.target.value)}
-                value={bio}
-              ></textarea>
-            </div>
-
-            <div className="sm:col-span-2">
-              <label
-                htmlFor="skills"
-                className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"
-              >
-                <Tags size={16} className="text-gray-500" />
-                Skills (comma separated)
-              </label>
-              <textarea
-                id="skills"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"
-                rows="3"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-              ></textarea>
-            </div>
-
-            {/* Update Button (Full Width) */}
-            
-            <div className="sm:col-span-3">
-              <label
-                htmlFor="role"
-                className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2"
-              >
-                <User size={16} className="text-gray-500" />
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <User size={16} />
                 Role
               </label>
               <input
-                id="roll"
-                type="text"
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"
-                onChange={(e) => setRole(e.target.value)}
                 value={role}
+                onChange={(e) => setRole(e.target.value)}
+                placeholder="e.g., Frontend Developer"
+                className="mt-1 w-full border border-gray-300 rounded-md p-2.5 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            <div className="sm:col-span-3 flex justify-end">
+            <div className="sm:col-span-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <NotebookPen size={16} />
+                Bio
+              </label>
+              <textarea
+                rows={3}
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md p-2.5 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Tags size={16} />
+                Skills (comma separated)
+              </label>
+              <textarea
+                rows={2}
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                className="mt-1 w-full border border-gray-300 rounded-md p-2.5 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* Update Button */}
+            <div className="sm:col-span-2 flex justify-end">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
+                className="px-6 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 flex items-center gap-2 transition"
               >
                 <Save size={18} />
                 Update Profile
@@ -278,89 +242,88 @@ const UpdateUser = () => {
         </div>
       </form>
 
-      {/* Card 2: Resume Update Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-        <h2 className="text-3xl font-bold mb-6 text-gray-800 border-b pb-4 flex items-center gap-3">
-          <FileText size={30} className="text-blue-600" />
+      {/* Resume Section */}
+      <div className="bg-white p-8 rounded-xl shadow-md space-y-6">
+        <h2 className="text-2xl font-bold text-gray-800 border-b pb-4 flex items-center gap-3">
+          <FileText className="text-blue-600" size={26} />
           Manage Resume
         </h2>
 
         {isEdit ? (
-          /* --- EDITING STATE --- */
           <form onSubmit={handleUpdateResume} className="space-y-4">
             <div>
-              <label
-                htmlFor="resumeUpload"
-                className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
-              >
-                <Upload size={16} className="text-gray-500" />
-                Upload a new resume (PDF only)
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                <Upload size={16} />
+                Upload a new resume (PDF)
               </label>
               <input
-                id="resumeUpload"
-                onChange={(e) => setNewResumeFile(e.target.files[0])}
-                accept="application/pdf"
                 type="file"
+                accept="application/pdf"
                 required
+                onChange={(e) => setNewResumeFile(e.target.files[0])}
                 className="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4
-                  file:rounded-lg file:border-0
+                  file:rounded-md file:border-0
                   file:text-sm file:font-semibold
                   file:bg-blue-50 file:text-blue-700
-                  hover:file:bg-blue-100 cursor-pointer"
+                  hover:file:bg-blue-100"
               />
             </div>
-            <div className="flex justify-end gap-4 pt-4">
+
+            <div className="flex justify-end gap-4">
               <button
                 type="button"
                 onClick={() => {
                   setIsEdit(false);
                   setNewResumeFile(null);
                 }}
-                className="px-5 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+                className="px-5 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 flex items-center gap-2"
               >
-                <X size={18} />
+                <X size={16} />
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
+                className="px-5 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 flex items-center gap-2"
               >
-                <Save size={18} />
+                <Save size={16} />
                 Save Resume
               </button>
             </div>
           </form>
         ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-gray-600">
-                {resumeUrl
-                  ? "Your current resume is on file."
-                  : "No resume uploaded."}
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <p className="text-gray-600">
+              {resumeUrl
+                ? "Your resume is uploaded and available below."
+                : "No resume uploaded yet."}
+            </p>
+            <div className="flex gap-3">
               <a
-                className={`px-5 py-2.5 font-semibold rounded-lg transition-colors flex items-center gap-2 ${
-                  !resumeUrl
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-blue-50 text-blue-700 hover:bg-blue-100"
-                }`}
                 href={resumeUrl || "#"}
+                onClick={(e) => {
+                  if (!resumeUrl) {
+                    e.preventDefault();
+                    toast.error("No resume uploaded!");
+                  }
+                }}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={handleResumeClick}
-                aria-disabled={!resumeUrl}
+                className={`px-5 py-2 flex items-center gap-2 rounded-md font-medium transition ${
+                  resumeUrl
+                    ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
               >
-                <Eye size={18} />
+                <Eye size={16} />
                 View Resume
               </a>
+
               <button
                 onClick={() => setIsEdit(true)}
-                className="px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors flex items-center gap-2"
+                className="px-5 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 flex items-center gap-2"
               >
-                {resumeUrl ? <Edit size={18} /> : <Upload size={18} />}
+                {resumeUrl ? <Edit size={16} /> : <Upload size={16} />}
                 {resumeUrl ? "Change Resume" : "Upload Resume"}
               </button>
             </div>
@@ -370,4 +333,5 @@ const UpdateUser = () => {
     </div>
   );
 };
+
 export default UpdateUser;

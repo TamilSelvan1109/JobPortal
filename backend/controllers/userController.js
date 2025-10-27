@@ -154,9 +154,9 @@ export const logoutUser = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.id;
-    const { name, phone, bio, skills } = req.body;
+    const { name, phone, bio, skills, role } = req.body;
     const profileImage = req.file;
-    
+
     const userData = await User.findById(userId);
 
     if (!userData) {
@@ -186,7 +186,7 @@ export const updateUserProfile = async (req, res) => {
       userData.profile.skills = skills.split(",").map((skill) => skill.trim());
     }
 
-    if(role){
+    if (role) {
       userData.profile.role = role;
     }
 
@@ -206,8 +206,10 @@ export const updateUserProfile = async (req, res) => {
 export const getUserData = async (req, res) => {
   try {
     const userId = req.id;
-    if(!userId){
-      return res.status(401).json({ success: false, message: "User Not Authorized" });
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User Not Authorized" });
     }
 
     const user = await User.findById(userId).select("-password");
@@ -255,19 +257,33 @@ export const getUserJobApplications = async (req, res) => {
   try {
     const userId = req.id;
 
-    const applications = await JobApplication.find(userId)
+    const applications = await JobApplication.find({ userId })
       .populate("companyId", "name email image")
       .populate("jobId", "title description location category level salary")
       .exec();
 
-    if (!applications) {
+    if (!applications || applications.length === 0) {
       return res.json({
         success: false,
         message: "No job applications found for this user",
       });
     }
 
-    return res.json({ success: true, applications });
+    const formattedApplications = applications.map((application) => ({
+      company: application.companyId.name,
+      logo: application.companyId.image,
+      title: application.jobId.title,
+      location: application.jobId.location,
+      date: application.date,
+      status: application.status || "Pending",
+      jobId: application.jobId._id,
+    }));
+
+    return res.json({
+      success: true,
+      applications: formattedApplications,
+      message: "Job applications fetched successfully",
+    });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
@@ -294,5 +310,21 @@ export const updateUserResume = async (req, res) => {
     });
   } catch (error) {
     res.json({ success: false, message: error.message });
+  }
+};
+
+export const isApplied = async (req, res) => {
+  try {
+    const userId = req.id;
+    const { jobId } = req.body;
+
+    const isExisted = await JobApplication.findOne({ userId, jobId });
+    if (isExisted) {
+      return res.json({ success: true, applied: true });
+    } else {
+      res.json({ success: false, applied: false });
+    }
+  } catch (error) {
+    return res.json({ success: false, message: error.message });
   }
 };

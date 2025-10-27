@@ -5,6 +5,7 @@ import {
   applyForJob,
   getUserData,
   getUserJobApplications,
+  isApplied,
   loginUser,
   logoutUser,
   registerUser,
@@ -50,5 +51,8 @@ router.post("/apply", isAuthenticated, applyForJob);
 
 // Get user applied jobs data
 router.get("/applications", isAuthenticated, getUserJobApplications);
+
+// To check the job is already applied or not
+router.post("/check-applied", isAuthenticated , isApplied);
 
 export default router;

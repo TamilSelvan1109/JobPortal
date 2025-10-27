@@ -1,110 +1,118 @@
-import { useContext, useEffect } from "react";
+import axios from "axios";
+import { useContext, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { assets } from "../assets/assets";
 import { AppContext } from "../context/AppContext";
+import Navbar from "../components/Navbar";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { companyData, setCompanyData, setCompanyToken } =
+  const { companyData, setCompanyData, setUserData, backendUrl } =
     useContext(AppContext);
 
-  // Function to logout for company
-  const logout = () => {
-    setCompanyToken(null);
-    localStorage.removeItem("companyToken");
-    setCompanyData(null);
-    navigate("/");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  const logout = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/users/logout`, {
+        withCredentials: true,
+      });
+      if (!data.success) return toast.error(data.message);
+
+      toast.success("Logged out successfully");
+      setUserData(null);
+      setCompanyData(null);
+      navigate("/");
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
-  useEffect(() => {
-    if (companyData) {
-      navigate("/company-dashboard/manage-jobs");
-    }
-  }, [companyData]);
-
   return (
-    <div className="min-h-screen">
-      {/* Navbar for Recruiter Panel */}
-
-      <div className="shadow py-4">
-        <div className="px-5 flex justify-between items-center">
-          <h1
-            className="text-3xl font-extrabold cursor-pointer max-sm:w-32"
-            onClick={() => navigate("/")}
-          >
-            <span className="text-blue-900">Spot</span>
-            <span className="text-black">Jobs</span>
-          </h1>
-
-          {companyData && (
-            <div className="flex items-center gap-3">
-              <p className="max-sm:hidden">Welcome, {companyData.name}</p>
-
-              <div className="relative group">
-                <img
-                  className="w-8 rounded-full"
-                  src={companyData.image}
-                  alt=""
-                />
-
-                <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12">
-                  <ul className="list-none m-0 p-2 bg-white border border-gray-400 rounded-md text-sm">
-                    <li
-                      className="py-1 px-2 cursor-pointer pr-5"
-                      onClick={logout}
-                    >
-                      Logout
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+    <div className="min-h-screen flex flex-col">
+      {/* Sticky Navbar */}
+      <div className="sticky top-0 z-50">
+        <Navbar />
       </div>
 
-      <div className="flex items-start">
-        {/* left sidebar with options to add job, manage job, view application */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div
+          className={`${
+            sidebarOpen ? "w-64" : "w-20"
+          } bg-white border-r border-gray-300 h-screen flex-shrink-0 transition-width duration-300 sticky top-16`}
+        >
+          {/* Toggle Button */}
+          <div className="flex justify-end p-2 sm:hidden">
+            <button
+              onClick={toggleSidebar}
+              className="p-1 rounded-md border border-gray-300"
+            >
+              {sidebarOpen ? "✕" : "☰"}
+            </button>
+          </div>
 
-        <div className="inline-block min-h-screen border-r-2 border-gray-400">
-          <ul className="flex flex-col items-start pt-1 text-gray-800">
+          <ul className="flex flex-col items-center sm:items-start pt-4 text-gray-800 h-full">
             <NavLink
               className={({ isActive }) =>
                 `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
-                  isActive && `bg-blue-100 border-r-4 border-blue-900`
+                  isActive ? "bg-blue-100 border-r-4 border-blue-900" : ""
                 }`
               }
-              to={"/company-dashboard/add-job"}
+              to="/recruiter/manage-jobs"
             >
-              <img className="min-w-4" src={assets.add_icon} alt="" />
-              <p className="max-sm:hidden">Add Job</p>
+              <img className="w-6 h-6" src={assets.home_icon} alt="" />
+              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
+                Manage Jobs
+              </p>
             </NavLink>
+
             <NavLink
               className={({ isActive }) =>
                 `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
-                  isActive && `bg-blue-100 border-r-4 border-blue-900`
+                  isActive ? "bg-blue-100 border-r-4 border-blue-900" : ""
                 }`
               }
-              to={"/company-dashboard/manage-jobs"}
+              to="/recruiter/add-job"
             >
-              <img className="min-w-4" src={assets.home_icon} alt="" />
-              <p className="max-sm:hidden">Manage Jobs</p>
+              <img className="w-6 h-6" src={assets.add_icon} alt="" />
+              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
+                Add Job
+              </p>
             </NavLink>
+
             <NavLink
               className={({ isActive }) =>
                 `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
-                  isActive && `bg-blue-100 border-r-4 border-blue-900`
+                  isActive ? "bg-blue-100 border-r-4 border-blue-900" : ""
                 }`
               }
-              to={"/company-dashboard/view-applications"}
+              to="/recruiter/view-applications"
             >
-              <img className="min-w-4" src={assets.person_tick_icon} alt="" />
-              <p className="max-sm:hidden">View Applications</p>
+              <img className="w-6 h-6" src={assets.person_tick_icon} alt="" />
+              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
+                View Applications
+              </p>
             </NavLink>
+
+            {/* Logout */}
+            <li
+              className="flex items-center p-3 sm:px-6 gap-2 w-full mt-auto cursor-pointer hover:bg-red-100 text-red-600"
+              onClick={logout}
+            >
+              <img className="w-6 h-6" src={assets.logout_icon} alt="Logout" />
+              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
+                Logout
+              </p>
+            </li>
           </ul>
         </div>
 
-        <div>
+        {/* Main content */}
+        <div className="flex-1 p-6 overflow-y-auto h-screen">
           <Outlet />
         </div>
       </div>
