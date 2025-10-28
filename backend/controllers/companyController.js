@@ -18,6 +18,24 @@ export const getCompanyData = async (req, res) => {
   }
 };
 
+// Get company data by Id
+export const getCompanyDataById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const company = await Company.findById(id).populate(
+      "createdBy",
+      "name email phone"
+    );
+    if (!company) {
+      return res.json({ success: false, message: "Company not found" });
+    }
+    console.log(company);
+    res.json({ success: true, company });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
 // Post a new job
 export const postJob = async (req, res) => {
   const { title, description, location, salary, level, category } = req.body;
@@ -56,7 +74,7 @@ export const getCompanyJobApplicants = async (req, res) => {
     }
 
     const applications = await JobApplication.find({ companyId: company._id })
-      .populate("userId", "name email profile image")
+      .populate("userId", "_id name email profile image")
       .populate("jobId", "title location")
       .exec();
 
@@ -69,6 +87,7 @@ export const getCompanyJobApplicants = async (req, res) => {
 
     const formattedApplications = applications.map((application) => ({
       id: application._id,
+      userId: application.userId._id, 
       name: application.userId.name,
       email: application.userId.email,
       image: application.userId.image,

@@ -14,6 +14,20 @@ export const getJobs = async (req, res) => {
   }
 };
 
+// Get jobs by Id to display for user in company details page
+export const getJobsByCompanyId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const jobs = await Job.find({ companyId: id });
+    if (!jobs) {
+      return res.status(400).json({ success: true, message: "No jobs found!" });
+    }
+    res.status(200).json({ success: true, jobs });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 // Get a single job by ID
 export const getJobById = async (req, res) => {
   try {
@@ -23,12 +37,12 @@ export const getJobById = async (req, res) => {
       select: "-password",
     });
 
-    if(!job){
-        return res.json({success:false, message:"Job not found"});
+    if (!job) {
+      return res.json({ success: false, message: "Job not found" });
     }
 
-    res.json({success:true, job});
+    res.json({ success: true, job });
   } catch (error) {
-    res.json({success:false, message:error.message})
+    res.json({ success: false, message: error.message });
   }
 };

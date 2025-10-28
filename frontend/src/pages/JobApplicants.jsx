@@ -1,13 +1,14 @@
 import axios from "axios";
-import { FileText, Filter } from "lucide-react";
+import { FileText, Filter, ArrowLeft } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { AppContext } from "../context/AppContext";
 
 const JobApplicants = () => {
   const { jobId } = useParams();
+  const navigate = useNavigate();
   const { backendUrl } = useContext(AppContext);
   const [applications, setApplications] = useState([]);
   const [filteredApps, setFilteredApps] = useState([]);
@@ -41,7 +42,7 @@ const JobApplicants = () => {
     };
 
     fetchApplications();
-  }, [backendUrl]);
+  }, [backendUrl, jobId]);
 
   // Apply filters
   useEffect(() => {
@@ -84,8 +85,26 @@ const JobApplicants = () => {
 
   const totalApplicationsCount = applications.length;
 
+  // Handle back navigation
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate("/recruiter/manage-jobs");
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* Back Button */}
+      <button
+        onClick={handleBack}
+        className="flex items-center gap-2 text-blue-700 font-medium hover:text-blue-900 transition mb-4"
+      >
+        <ArrowLeft size={20} />
+        Back
+      </button>
+
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">

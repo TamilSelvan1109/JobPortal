@@ -1,51 +1,81 @@
+import axios from "axios";
 import {
-  Briefcase,
-  Calendar,
+  ArrowLeft,
   FileText,
+  Github,
+  Linkedin,
   Mail,
-  MapPin,
   NotebookPen,
   Phone,
   Tags,
-  Linkedin,
-  Github,
 } from "lucide-react";
-import moment from "moment";
-import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { AppContext } from "../context/AppContext";
 
-const UserProfile = () => {
-  const { userData, jobsApplied, isLoading } = useContext(AppContext);
+const UserCard = () => {
+  const { id } = useParams();
+  const { backendUrl } = useContext(AppContext);
   const navigate = useNavigate();
+  const [userData, setUserData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!userData) return null;
+  const fetchUserData = async () => {
+    setLoading(true);
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/users/user/${id}`, {
+        withCredentials: true,
+      });
+      if (!data) {
+        return toast.error("User data not found!");
+      }
+      setUserData(data.user);
+      console.log(data.user);
+      setLoading(false);
+    } catch (error) {
+      return toast.error(error.message);
+    }
+  };
 
-  const latestJobs = jobsApplied ? [...jobsApplied].reverse().slice(0, 4) : [];
+  useEffect(() => {
+    if (id) {
+      fetchUserData();
+    }
+  }, [id, backendUrl]);
 
-  return isLoading ? (
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  return loading ? (
     <Loading />
   ) : (
     <>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
         <div className="max-w-6xl mx-auto space-y-6">
+          {/* Back Button */}
+          <button
+            onClick={handleBack}
+            className="flex items-center gap-2 text-blue-700 font-medium hover:text-blue-900 transition mb-4 cursor-pointer"
+          >
+            <ArrowLeft size={20} />
+            Back
+          </button>
+
           {/* Profile Header Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-            {/* Cover Background */}
             <div className="h-20 bg-gradient-to-r from-blue-900 to-blue-700"></div>
 
-            {/* Profile Content */}
             <div className="px-6 sm:px-8 pb-8">
               <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 -mt-16 sm:-mt-12">
-                {/* Avatar */}
                 <img
                   src={userData.image}
                   alt="User Avatar"
                   className="w-32 h-32 rounded-2xl border-4 border-white object-cover shadow-lg"
                 />
 
-                {/* Name & Role */}
                 <div className="text-center sm:text-left mb-4 sm:mb-0 flex-1">
                   <h1 className="text-3xl font-bold text-gray-900 mb-1">
                     {userData.name}
@@ -98,90 +128,10 @@ const UserProfile = () => {
                   )}
                 </div>
               </div>
-
-              {/* Recent Applications */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-8 border-l-blue-900 p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-50 rounded-lg">
-                    <Briefcase className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Recent Applications
-                  </h2>
-                </div>
-
-                {latestJobs.length > 0 ? (
-                  <div className="space-y-4">
-                    {latestJobs.map((job, i) => (
-                      <div
-                        key={i}
-                        className="border border-gray-200 rounded-xl p-4 hover:border-blue-300 hover:shadow-md transition-all"
-                      >
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          <img
-                            src={job.logo}
-                            alt={job.company}
-                            className="w-16 h-16 rounded-lg object-cover border border-gray-200"
-                          />
-
-                          <div className="flex-1 space-y-2">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {job.title}
-                              </h3>
-                              <span
-                                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold w-fit ${
-                                  job.status === "Accepted"
-                                    ? "bg-green-50 text-green-700 border border-green-200"
-                                    : job.status === "Rejected"
-                                    ? "bg-red-50 text-red-700 border border-red-200"
-                                    : job.status === "Pending"
-                                    ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
-                                    : "bg-blue-50 text-blue-700 border border-blue-200"
-                                }`}
-                              >
-                                {job.status}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4 text-blue-600" />
-                                {job.location}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4 text-blue-600" />
-                                {moment(job.date).format("MMM DD, YYYY")}
-                              </span>
-                            </div>
-
-                            <button
-                              onClick={() =>
-                                navigate(`/apply-job/${job.jobId}`)
-                              }
-                              className="flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                            >
-                              View Resume <FileText className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500">
-                      No recent applications found.
-                    </p>
-                  </div>
-                )}
-              </div>
             </div>
 
-            {/* Right Column */}
+            {/* Right Column - Contact Info */}
             <div className="space-y-6">
-              {/* Contact Info */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-8 border-l-blue-900 p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 bg-blue-50 rounded-lg">
@@ -191,6 +141,7 @@ const UserProfile = () => {
                 </div>
 
                 <div className="space-y-4">
+                  {/* Email */}
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-gray-50 rounded-lg">
                       <Mail className="w-4 h-4 text-gray-600" />
@@ -205,6 +156,7 @@ const UserProfile = () => {
                     </div>
                   </div>
 
+                  {/* Phone */}
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-gray-50 rounded-lg">
                       <Phone className="w-4 h-4 text-gray-600" />
@@ -218,25 +170,11 @@ const UserProfile = () => {
                       </p>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Professional Links */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 border-l-8 border-l-blue-900 p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 bg-blue-50 rounded-lg">
-                    <FileText className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Professional Links
-                  </h2>
-                </div>
-
-                <div className="space-y-4">
                   {/* LinkedIn */}
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-gray-50 rounded-lg">
-                      <Linkedin className="w-4 h-4 text-blue-700" />
+                      <Linkedin className="w-4 h-4 text-gray-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-xs font-medium text-gray-500 mb-1">
@@ -249,7 +187,7 @@ const UserProfile = () => {
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
-                          Visit LinkedIn →
+                          View Profile
                         </a>
                       ) : (
                         <p className="text-sm text-gray-500">Not provided</p>
@@ -260,7 +198,7 @@ const UserProfile = () => {
                   {/* GitHub */}
                   <div className="flex items-start gap-3">
                     <div className="p-2 bg-gray-50 rounded-lg">
-                      <Github className="w-4 h-4 text-gray-700" />
+                      <Github className="w-4 h-4 text-gray-600" />
                     </div>
                     <div className="flex-1">
                       <p className="text-xs font-medium text-gray-500 mb-1">
@@ -273,7 +211,7 @@ const UserProfile = () => {
                           rel="noopener noreferrer"
                           className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
-                          Visit GitHub →
+                          View Repository
                         </a>
                       ) : (
                         <p className="text-sm text-gray-500">Not provided</p>
@@ -295,9 +233,10 @@ const UserProfile = () => {
                           href={userData.profile.resume}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          className="flex gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
-                          View Resume →
+                          View Resume{" "}
+                          <FileText className="w-4 h-4 text-blue-600" />
                         </a>
                       ) : (
                         <p className="text-sm text-gray-500">Not uploaded</p>
@@ -314,4 +253,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default UserCard;

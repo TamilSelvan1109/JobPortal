@@ -2,7 +2,7 @@ import axios from "axios";
 import kconvert from "k-convert";
 import moment from "moment";
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { assets } from "../assets/assets";
 import Footer from "../components/Footer";
@@ -14,7 +14,8 @@ import { AppContext } from "../context/AppContext";
 const ApplyJob = () => {
   const { id } = useParams();
   const [jobData, setJobData] = useState(null);
-  const { jobs, backendUrl, userData, jobsApplied, fetchAppliedJobs } = useContext(AppContext);
+  const { jobs, backendUrl, userData, jobsApplied, fetchAppliedJobs } =
+    useContext(AppContext);
   const [isAlreadyApplied, setIsAlreadyApplied] = useState(false);
 
   const fetchJob = async () => {
@@ -31,8 +32,8 @@ const ApplyJob = () => {
   };
 
   const checkIsApplied = async () => {
-    const hasApplied = jobsApplied.some(item => item.jobId === id);
-      setIsAlreadyApplied(hasApplied)
+    const hasApplied = jobsApplied.some((item) => item.jobId === id);
+    setIsAlreadyApplied(hasApplied);
   };
 
   useEffect(() => {
@@ -41,7 +42,7 @@ const ApplyJob = () => {
 
   useEffect(() => {
     checkIsApplied();
-  }, [jobData, jobsApplied, id]);
+  }, [jobData, jobsApplied, id, backendUrl]);
 
   const applyHandler = async () => {
     try {
@@ -54,7 +55,7 @@ const ApplyJob = () => {
       }
 
       if (!userData.profile.resume) {
-        return toast.error("Upload resume to apply for a job!");
+        return toast.error("Upload resume in profile section!");
       }
 
       const { data } = await axios.post(
@@ -77,15 +78,17 @@ const ApplyJob = () => {
     <>
       <Navbar />
 
-      <div className="min-h-screen flex flex-col py-10 container px-4 2xl:px-20 mx-auto">
+      <div className="min-h-screen flex flex-col py-10 pt-30 container px-4 2xl:px-20 mx-auto">
         <div className="bg-white text-black rounded-lg w-full">
           <div className="flex justify-center md:justify-between flex-wrap gap-8 px-14 py-20 mb-6 bg-sky-100 border-sky-500 rounded-xl">
             <div className="flex flex-col md:flex-row items-center">
-              <img
-                className="h-24 bg-white rounded-lg p-4 mr-4 max-md:mb-4 border border-sky-800"
-                src={jobData.companyId.image}
-                alt=""
-              />
+              <Link to={`/apply-job/company-details/${jobData.companyId._id}`}>
+                <img
+                  className="h-24 bg-white rounded-lg p-4 mr-4 max-md:mb-4 border border-sky-800"
+                  src={jobData.companyId.image}
+                  alt=""
+                />
+              </Link>
               <div className="text-center md:text-left text-neutral-900">
                 <h1 className="text-2xl sm:text-4xl font-medium">
                   {jobData.title}
@@ -166,7 +169,9 @@ const ApplyJob = () => {
                 )
                 .filter((job) => {
                   // Set of applied jobIds
-                  const appliedJobsIds = new Set(jobsApplied.map(item => item.jobId));
+                  const appliedJobsIds = new Set(
+                    jobsApplied.map((item) => item.jobId)
+                  );
                   // Exclude applied jobs
                   return !appliedJobsIds.has(job._id);
                 })

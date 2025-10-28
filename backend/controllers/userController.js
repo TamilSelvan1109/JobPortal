@@ -6,7 +6,6 @@ import JobApplication from "../models/JobApplication.js";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 
-// Register a new user
 export const registerUser = async (req, res) => {
   try {
     const { name, email, phone, password, role } = req.body;
@@ -17,6 +16,7 @@ export const registerUser = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Some details are missing" });
     }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
@@ -28,17 +28,6 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const imageUpload = await cloudinary.uploader.upload(profileImage.path);
-    let companyId = null;
-
-    if (role === "Recruiter") {
-      const newCompany = await Company.create({
-        name,
-        contactEmail: email,
-        image: imageUpload.secure_url,
-      });
-
-      companyId = newCompany._id;
-    }
 
     const newUser = await User.create({
       name,
@@ -47,10 +36,23 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
       role,
       image: imageUpload.secure_url,
-      profile: {
-        company: companyId,
-      },
     });
+
+    let companyId = null;
+
+    if (role === "Recruiter") {
+      const newCompany = await Company.create({
+        name,
+        contactEmail: email,
+        image: imageUpload.secure_url,
+        createdBy: newUser._id,
+      });
+
+      companyId = newCompany._id;
+
+      newUser.profile = { company: companyId };
+      await newUser.save();
+    }
 
     const token = generateToken(newUser._id);
 
@@ -150,55 +152,91 @@ export const logoutUser = async (req, res) => {
   }
 };
 
-// Update user profile
+// Update the User profile
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.id;
-    const { name, phone, bio, skills, role } = req.body;
+    const {
+      name,
+      phone,
+      bio,
+      skills,
+      role,
+      linkedin,
+      github,
+      companyWebsite,
+      companyIndustry,
+      companySize,
+      companyContactEmail,
+      companyLocation,
+      companyDescription,
+    } = req.body;
+
     const profileImage = req.file;
+    let uploadedImageUrl = null;
 
-    const userData = await User.findById(userId);
+    if (profileImage) {
+      const upload = await cloudinary.uploader.upload(profileImage.path);
+      uploadedImageUrl = upload.secure_url;
+    }
 
-    if (!userData) {
+    const user = await User.findById(userId).populate("profile.company");
+    if (!user) {
       return res
-        .status(400)
+        .status(404)
         .json({ success: false, message: "User not found!" });
     }
 
-    if (profileImage) {
-      const imageUpload = await cloudinary.uploader.upload(profileImage.path);
-      userData.image = imageUpload.secure_url;
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+    if (uploadedImageUrl) user.image = uploadedImageUrl;
+
+    if (user.role === "User") {
+      if (bio) user.profile.bio = bio;
+      if (skills) user.profile.skills = skills.split(",").map((s) => s.trim());
+      if (role) user.profile.role = role;
+      if (linkedin) user.profile.linkedin = linkedin;
+      if (github) user.profile.github = github;
     }
 
-    if (name) userData.name = name;
+    if (user.role === "Recruiter") {
+      if (!user.profile?.company) {
+        return res
+          .status(400)
+          .json({ success: false, message: "No company linked with user!" });
+      }
 
-    if (userData.role === "Recruiter" && name) {
-      const companyData = await Company.findById(userData.profile.company);
-      companyData.name = name;
-      await companyData.save();
+      let company = await Company.findById(user.profile.company);
+      if (!company) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Company not found!" });
+      }
+
+      if (uploadedImageUrl) company.image = uploadedImageUrl;
+      if (name) company.name = name;
+      if (companyWebsite) company.website = companyWebsite;
+      if (companyIndustry) company.industry = companyIndustry;
+      if (companySize) company.size = companySize;
+      if (companyDescription) company.description = companyDescription;
+      if (companyLocation) company.location = companyLocation;
+      if (companyContactEmail) company.contactEmail = companyContactEmail;
+
+      await company.save();
     }
 
-    if (phone) userData.phone = phone;
+    await user.save();
 
-    if (bio) userData.profile.bio = bio;
-
-    if (skills) {
-      userData.profile.skills = skills.split(",").map((skill) => skill.trim());
-    }
-
-    if (role) {
-      userData.profile.role = role;
-    }
-
-    await userData.save();
+    const userData = await User.findById(userId);
 
     return res.json({
       success: true,
-      message: "Profile Updated",
-      user: userData,
+      message: "Profile updated successfully",
+      userData,
     });
   } catch (error) {
-    res.json({ success: false, message: error.message });
+    console.error("Update profile error:", error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -213,6 +251,23 @@ export const getUserData = async (req, res) => {
     }
 
     const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User Not Found" });
+    }
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// Get the user data by Id
+export const getUserDataById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id).select("-password");
+    console.log(user);
     if (!user) {
       return res
         .status(404)

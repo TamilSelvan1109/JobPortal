@@ -1,16 +1,24 @@
 import axios from "axios";
+import {
+  BriefcaseIcon,
+  ChevronLeft,
+  ChevronRight,
+  FilePlus,
+  FileText,
+  LogOut,
+  UserCircle,
+  UserPen,
+} from "lucide-react";
 import { useContext, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { assets } from "../assets/assets";
-import { AppContext } from "../context/AppContext";
 import Navbar from "../components/Navbar";
+import { AppContext } from "../context/AppContext";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-  const { companyData, setCompanyData, setUserData, backendUrl } =
+  const { setCompanyData, setUserData, backendUrl, fetchUserData } =
     useContext(AppContext);
-
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -25,6 +33,7 @@ const Dashboard = () => {
       toast.success("Logged out successfully");
       setUserData(null);
       setCompanyData(null);
+      await fetchUserData();
       navigate("/");
     } catch (error) {
       toast.error(error.message);
@@ -32,92 +41,106 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Sticky Navbar */}
-      <div className="sticky top-0 z-50">
-        <Navbar />
-      </div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* Navbar */}
+      <Navbar />
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* Layout below navbar */}
+      <div className="flex flex-1 pt-16">
         {/* Sidebar */}
-        <div
-          className={`${
+        <aside
+          className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 flex flex-col justify-between transition-all duration-300 z-40 ${
             sidebarOpen ? "w-64" : "w-20"
-          } bg-white border-r border-gray-300 h-screen flex-shrink-0 transition-width duration-300 sticky top-16`}
+          }`}
         >
-          {/* Toggle Button */}
-          <div className="flex justify-end p-2 sm:hidden">
-            <button
-              onClick={toggleSidebar}
-              className="p-1 rounded-md border border-gray-300"
-            >
-              {sidebarOpen ? "✕" : "☰"}
-            </button>
+          <div className="flex-1 overflow-hidden">
+            {/* Toggle Button */}
+            <div className="flex justify-end border-b p-1 border-gray-100">
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+              >
+                {sidebarOpen ? <ChevronLeft /> : <ChevronRight />}
+              </button>
+            </div>
+
+            {/* Menu Links */}
+            <nav className="mt-4 flex flex-col gap-2 px-3">
+              <NavItem
+                to="/recruiter/profile"
+                label="Profile"
+                icon={<UserCircle className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+              <NavItem
+                to="/recruiter/edit"
+                label="Edit Profile"
+                icon={<UserPen className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+              <NavItem
+                to="/recruiter/manage-jobs"
+                label="Manage Jobs"
+                icon={<BriefcaseIcon className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+              <NavItem
+                to="/recruiter/add-job"
+                label="Post Job"
+                icon={<FilePlus className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+              <NavItem
+                to="/recruiter/view-applications"
+                label="Applications"
+                icon={<FileText className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+            </nav>
           </div>
 
-          <ul className="flex flex-col items-center sm:items-start pt-4 text-gray-800 h-full">
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
-                  isActive ? "bg-blue-100 border-r-4 border-blue-900" : ""
-                }`
-              }
-              to="/recruiter/manage-jobs"
-            >
-              <img className="w-6 h-6" src={assets.home_icon} alt="" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                Manage Jobs
-              </p>
-            </NavLink>
-
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
-                  isActive ? "bg-blue-100 border-r-4 border-blue-900" : ""
-                }`
-              }
-              to="/recruiter/add-job"
-            >
-              <img className="w-6 h-6" src={assets.add_icon} alt="" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                Add Job
-              </p>
-            </NavLink>
-
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-2 w-full hover:bg-gray-100 ${
-                  isActive ? "bg-blue-100 border-r-4 border-blue-900" : ""
-                }`
-              }
-              to="/recruiter/view-applications"
-            >
-              <img className="w-6 h-6" src={assets.person_tick_icon} alt="" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                View Applications
-              </p>
-            </NavLink>
-
-            {/* Logout */}
-            <li
-              className="flex items-center p-3 sm:px-6 gap-2 w-full mt-auto cursor-pointer hover:bg-red-100 text-red-600"
+          {/* Logout at bottom */}
+          <div className="border-t border-gray-200 p-3">
+            <button
               onClick={logout}
+              className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-600 hover:bg-red-50 transition-all"
             >
-              <img className="w-6 h-6" src={assets.logout_icon} alt="Logout" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                Logout
-              </p>
-            </li>
-          </ul>
-        </div>
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span className="whitespace-nowrap">Logout</span>}
+            </button>
+          </div>
+        </aside>
 
-        {/* Main content */}
-        <div className="flex-1 p-6 overflow-y-auto h-screen">
-          <Outlet />
-        </div>
+        {/* Main Content */}
+        <main
+          className={`flex-1 transition-all duration-300 h-[calc(100vh-4rem)] overflow-y-auto ${
+            sidebarOpen ? "ml-64" : "ml-20"
+          }`}
+        >
+          <div className="p-6 max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );
 };
+
+/* Reusable Sidebar Link Component */
+const NavItem = ({ to, label, icon, sidebarOpen }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+        isActive
+          ? "bg-blue-100 text-blue-900 font-semibold shadow-sm"
+          : "text-gray-700 hover:bg-gray-100"
+      }`
+    }
+  >
+    {icon}
+    {sidebarOpen && <span className="whitespace-nowrap">{label}</span>}
+  </NavLink>
+);
 
 export default Dashboard;

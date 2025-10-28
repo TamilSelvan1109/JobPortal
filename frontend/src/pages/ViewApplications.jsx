@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Briefcase, FileText, Filter, MapPin } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import Loading from "../components/Loading";
 import { AppContext } from "../context/AppContext";
@@ -27,6 +28,7 @@ const ViewApplications = () => {
         if (data.success) {
           setApplications(data.applications);
           setFilteredApps(data.applications);
+          console.log(data.applications);
         } else {
           setApplications([]);
           setFilteredApps([]);
@@ -176,9 +178,13 @@ const ViewApplications = () => {
                         alt={app.name || "Applicant"}
                         className="w-10 h-10 rounded-full border border-gray-300 object-cover flex-shrink-0"
                       />
-                      <span className="truncate max-w-[120px] text-gray-800 font-medium">
-                        {app.name || "N/A"}
-                      </span>
+                      <Link
+                        to={`/company/view-applications/user-details/${app.userId}`}
+                      >
+                        <span className="truncate max-w-[120px] text-l text-gray-800 font-medium hover:text-blue-500">
+                          {app.name || "N/A"}
+                        </span>
+                      </Link>
                     </td>
 
                     {/* Email */}
@@ -233,7 +239,7 @@ const ViewApplications = () => {
                             ? "bg-green-100 text-green-700 border-green-300"
                             : app.status === "Rejected"
                             ? "bg-red-100 text-red-700 border-red-300"
-                            : app.status === "Shortlisted" 
+                            : app.status === "Shortlisted"
                             ? "bg-blue-100 text-blue-700 border-blue-300"
                             : "bg-yellow-100 text-yellow-700 border-yellow-300"
                         }`}

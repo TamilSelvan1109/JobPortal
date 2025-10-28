@@ -17,7 +17,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="container 2xl:px-20 mx-auto my-10 ">
+    <div className="container 2xl:px-20 mx-auto my-10 mt-25">
       <div className="bg-gradient-to-r from-sky-700 to-sky-800 text-white py-6 text-center mx-2 rounded-xl">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium mb-4">
           Over 10,000+ jobs apply!

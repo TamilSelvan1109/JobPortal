@@ -4,6 +4,7 @@ import upload from "../config/multer.js";
 import {
   applyForJob,
   getUserData,
+  getUserDataById,
   getUserJobApplications,
   isApplied,
   loginUser,
@@ -46,6 +47,9 @@ router.get("/logout", isAuthenticated, logoutUser);
 // Get a user data
 router.get("/user", isAuthenticated, getUserData);
 
+// Get a user data by Id
+router.get("/user/:id", getUserDataById);
+
 // Apply for a job
 router.post("/apply", isAuthenticated, applyForJob);
 
@@ -53,6 +57,6 @@ router.post("/apply", isAuthenticated, applyForJob);
 router.get("/applications", isAuthenticated, getUserJobApplications);
 
 // To check the job is already applied or not
-router.post("/check-applied", isAuthenticated , isApplied);
+router.post("/check-applied", isAuthenticated, isApplied);
 
 export default router;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { Axios } from "axios";
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -21,13 +21,13 @@ export const AppContextProvider = (props) => {
   const [userApplications, setUserApplications] = useState([]);
   const [jobsApplied, setJobsApplied] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
   // Fetch all jobs
   const fetchJobs = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/jobs`);
       if (data.success) {
         setJobs(data.jobs);
+        console.log("Fetched Jobs: ", data.jobs);
       } else {
         toast.error(data.message);
       }
@@ -67,7 +67,7 @@ export const AppContextProvider = (props) => {
   const fetchCompanyData = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/company/company`, {
-        withCredentials: true, // since you use cookie-based auth
+        withCredentials: true,
       });
 
       if (data.success) {
@@ -96,6 +96,7 @@ export const AppContextProvider = (props) => {
       toast.error(error.response?.data?.message || error.message);
     }
   };
+
 
   // Initialize on mount
   useEffect(() => {

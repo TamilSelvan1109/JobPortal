@@ -19,7 +19,6 @@ const ManageJobs = () => {
 
       if (data.success) {
         setCompanyJobs(data.jobsData.reverse());
-        console.log(data.jobsData.reverse());
       } else {
         toast.error(data.message || "Failed to load jobs");
       }

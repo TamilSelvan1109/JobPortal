@@ -4,6 +4,7 @@ import {
   changeJobVisiblty,
   getApplicantsByJobId,
   getCompanyData,
+  getCompanyDataById,
   getCompanyJobApplicants,
   getCompanyPostedJobs,
   postJob,
@@ -14,6 +15,9 @@ const router = express.Router();
 
 // Get company data
 router.get("/company", isAuthenticated, getCompanyData);
+
+// Get company data by Id
+router.get("/company-details/:id", isAuthenticated, getCompanyDataById);
 
 // Post a job
 router.post("/post-job", isAuthenticated, postJob);

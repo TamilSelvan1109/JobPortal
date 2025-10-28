@@ -59,19 +59,20 @@ const LoginRegister = ({ onClose }) => {
       if (isLogin) {
         // --- LOGIN LOGIC ---
         const loginPayload = { email, password, role };
-        const res = await axios.post(
+        const {data} = await axios.post(
           `${backendUrl}/api/Users/login`,
           loginPayload,
           {
             withCredentials: true,
           }
         );
-        if (res.data.success) {
-          setUserData(res.data.user);
-          toast.success("Logged in successfully!");
+        if (data.success) {
+          setUserData(data.user);
+          console.log(data.user);
+          toast.success(data.message);
           onClose();
         } else {
-          toast.error(res.data.message || "Login failed. Please try again.");
+          toast.error(data.message || "Login failed. Please try again.");
         }
       } else {
         // --- REGISTER LOGIC ---

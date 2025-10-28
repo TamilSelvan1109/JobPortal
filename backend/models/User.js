@@ -1,4 +1,4 @@
-import mongoose, { skipMiddlewareFunction } from "mongoose";
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    phone:{
+    phone: {
       type: Number,
       required: true,
     },
@@ -28,13 +28,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    profile:{
+    isVerified: { type: Boolean, default: false },
+    lastLogin: { type: Date },
+    profile: {
       bio: { type: String, default: "" },
-      role:{ type: String, default: "" },
+      website: { type: String, default: "" },
+      role: { type: String, default: "" },
       skills: { type: [String], default: [] },
       resume: { type: String, default: "" },
-      company:{type:mongoose.Schema.Types.ObjectId, ref:"Company", default:null},
-    }
+      linkedin:{type:String, default:""},
+      github:{type:String, default:""},
+      company: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Company",
+        default: null,
+      },
+    },
   },
   { timestamps: true }
 );

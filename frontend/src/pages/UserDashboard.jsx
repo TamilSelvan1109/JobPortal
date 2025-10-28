@@ -1,5 +1,5 @@
 import axios from "axios";
-import { FileEdit, FileText, LogOut, UserCircle } from "lucide-react";
+import { FileText, LogOut, UserCircle, ChevronLeft, ChevronRight, FileEdit } from "lucide-react";
 import { useContext, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import { AppContext } from "../context/AppContext";
 
 const UserDashboard = () => {
-  const { userData, setUserData, backendUrl } = useContext(AppContext);
+  const { userData, setUserData, backendUrl, fetchUserData } = useContext(AppContext);
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -22,6 +22,7 @@ const UserDashboard = () => {
 
       toast.success("Logged out successfully");
       setUserData(null);
+      await fetchUserData();
       navigate("/");
     } catch (error) {
       toast.error(error.message);
@@ -30,98 +31,93 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Sticky Navbar */}
-      <div className="sticky top-0 z-50">
-        <Navbar />
-      </div>
+      {/* 🧭 Navbar */}
+      <Navbar />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <div
-          className={`${
+      {/* Layout below navbar */}
+      <div className="flex flex-1 pt-16">
+        {/* 🧱 Sidebar */}
+        <aside
+          className={`fixed top-16 left-0 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 flex flex-col justify-between transition-all duration-300 z-40 ${
             sidebarOpen ? "w-64" : "w-20"
-          } flex flex-col items-center sm:items-start pt-4 text-gray-800 min-h-screen`}
-          style={{ height: "calc(100vh - 4rem)" }}
+          }`}
         >
-          {/* Toggle Button (mobile only) */}
-          <div className="flex justify-end p-2 sm:hidden">
-            <button
-              onClick={toggleSidebar}
-              className="p-1 rounded-md border border-gray-300"
-            >
-              {sidebarOpen ? "✕" : "☰"}
-            </button>
+          <div className="flex-1 overflow-hidden">
+            {/* Toggle Button */}
+            <div className="flex justify-end border-b p-1 border-gray-100">
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+              >
+                {sidebarOpen ? <ChevronLeft /> : <ChevronRight />}
+              </button>
+            </div>
+
+            {/* Menu Links */}
+            <nav className="mt-4 flex flex-col gap-2 px-3">
+              <NavItem
+                to="/user/profile"
+                label="Profile"
+                icon={<UserCircle className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+              <NavItem
+                to="/user/edit"
+                label="Edit Details"
+                icon={<FileEdit className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+              <NavItem
+                to="/user/applications"
+                label="Applications"
+                icon={<FileText className="w-5 h-5" />}
+                sidebarOpen={sidebarOpen}
+              />
+            </nav>
           </div>
 
-          <ul className="flex flex-col items-center sm:items-start pt-4 text-gray-800 h-full">
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-3 w-full hover:bg-gray-100 ${
-                  isActive
-                    ? "bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold"
-                    : ""
-                }`
-              }
-              to="/user/profile"
-            >
-              <UserCircle className="w-5 h-5" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                My Profile
-              </p>
-            </NavLink>
-
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-3 w-full hover:bg-gray-100 ${
-                  isActive
-                    ? "bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold"
-                    : ""
-                }`
-              }
-              to="/user/edit"
-            >
-              <FileEdit className="w-5 h-5" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                Edit Details
-              </p>
-            </NavLink>
-
-            <NavLink
-              className={({ isActive }) =>
-                `flex items-center p-3 sm:px-6 gap-3 w-full hover:bg-gray-100 ${
-                  isActive
-                    ? "bg-blue-100 border-r-4 border-blue-900 text-blue-900 font-semibold"
-                    : ""
-                }`
-              }
-              to="/user/applications"
-            >
-              <FileText className="w-5 h-5" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                Applications
-              </p>
-            </NavLink>
-
-            {/* Logout */}
-            <li
-              className="flex items-center p-3 sm:px-6 gap-3 w-full mt-auto cursor-pointer hover:bg-red-100 text-red-600"
+          {/* Logout at bottom */}
+          <div className="border-t border-gray-200 p-3">
+            <button
               onClick={logout}
+              className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-red-600 hover:bg-red-50 transition-all"
             >
-              <LogOut className="w-5 h-5" />
-              <p className={`${sidebarOpen ? "block" : "hidden"} sm:block`}>
-                Logout
-              </p>
-            </li>
-          </ul>
-        </div>
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              {sidebarOpen && <span className="whitespace-nowrap">Logout</span>}
+            </button>
+          </div>
+        </aside>
 
-        {/* Main content */}
-        <div className="flex-1 p-6 overflow-y-auto h-screen">
-          <Outlet />
-        </div>
+        {/* 📄 Main Content */}
+        <main
+          className={`flex-1 transition-all duration-300 h-[calc(100vh-4rem)] overflow-y-auto ${
+            sidebarOpen ? "ml-64" : "ml-20"
+          }`}
+        >
+          <div className="p-6 max-w-7xl mx-auto">
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );
 };
+
+/* 🎨 Reusable Sidebar Link Component */
+const NavItem = ({ to, label, icon, sidebarOpen }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+        isActive
+          ? "bg-blue-100 text-blue-900 font-semibold shadow-sm"
+          : "text-gray-700 hover:bg-gray-100"
+      }`
+    }
+  >
+    {icon}
+    {sidebarOpen && <span className="whitespace-nowrap">{label}</span>}
+  </NavLink>
+);
 
 export default UserDashboard;
