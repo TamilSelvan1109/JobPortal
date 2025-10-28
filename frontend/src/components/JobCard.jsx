@@ -4,30 +4,62 @@ const JobCard = ({ job }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="border p-6 shadow rounded">
-      <div className="flex justify-between items-center">
-        <img className="h-8" src={job.companyId.image} alt="" />
+    <div
+      className="w-full h-[320px] border border-gray-200 rounded-2xl p-6 bg-white 
+                 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+    >
+      {/* Company Info */}
+      <div>
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src={job.companyId.image}
+            alt={job.companyId.name}
+            className="h-10 w-10 rounded-lg object-cover border border-gray-200"
+          />
+          <div>
+            <h3 className="font-semibold text-gray-900 text-base">
+              {job.companyId.name}
+            </h3>
+            <p className="text-xs text-gray-500">{job.location}</p>
+          </div>
+        </div>
+
+        {/* Job Title */}
+        <h4 className="text-lg font-bold text-gray-900 mt-2 line-clamp-1">
+          {job.title}
+        </h4>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2 mt-3">
+          <span className="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-full text-xs font-medium">
+            {job.location}
+          </span>
+          <span className="bg-red-50 text-red-700 border border-red-100 px-3 py-1 rounded-full text-xs font-medium">
+            {job.level}
+          </span>
+          {job.jobType && (
+            <span className="bg-green-50 text-green-700 border border-green-100 px-3 py-1 rounded-full text-xs font-medium">
+              {job.jobType}
+            </span>
+          )}
+        </div>
+
+        {/* Description */}
+        <p
+          className="text-gray-600 text-sm mt-4 line-clamp-3 leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: job.description.slice(0, 150) }}
+        ></p>
       </div>
-      <h4 className="text-xl font-medium mt-2">{job.title}</h4>
-      <div className="flex items-center gap-3 mt-2 text-xs">
-        <span className="bg-blue-50 border border-blue-200 px-4 py-1.5 rounded">
-          {job.location}
-        </span>
-        <span className="bg-red-50 border border-red-200 px-4 py-1.5 rounded">
-          {job.level}
-        </span>
-      </div>
-      <p
-        className="text-gray-600 text-sm mt-4 line-clamp-3"
-        dangerouslySetInnerHTML={{ __html: job.description.slice(0, 200) }}
-      ></p>
-      <div className="mt-4 flex gap-4 text-sm">
+
+      {/* Buttons */}
+      <div className="mt-4 flex gap-3">
         <button
           onClick={() => {
             navigate(`/apply-job/${job._id}`);
             scrollTo(0, 0);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
+          className="flex-1 bg-blue-700 hover:bg-blue-800 text-white px-4 py-2.5 
+                     rounded-lg text-sm font-medium transition-all duration-300"
         >
           Apply Now
         </button>
@@ -36,7 +68,8 @@ const JobCard = ({ job }) => {
             navigate(`/apply-job/${job._id}`);
             scrollTo(0, 0);
           }}
-          className="text-gray-600 border border-gray-600 rounded px-4 py-2 cursor-pointer"
+          className="flex-1 text-gray-700 hover:text-blue-700 border border-gray-300 
+                     hover:border-blue-400 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300"
         >
           Learn More
         </button>

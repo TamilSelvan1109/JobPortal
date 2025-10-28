@@ -161,6 +161,7 @@ const ApplyJob = () => {
               <h2 className="font-bold mt-2">
                 More Jobs from {jobData.companyId.name}
               </h2>
+
               {jobs
                 .filter(
                   (job) =>
@@ -174,11 +175,26 @@ const ApplyJob = () => {
                   );
                   // Exclude applied jobs
                   return !appliedJobsIds.has(job._id);
-                })
-                .slice(0, 4)
-                .map((job, index) => (
-                  <JobCard key={index} job={job} />
-                ))}
+                }).length === 0 ? (
+                <p className="text-gray-500 text-sm mt-2">
+                  No other jobs available from this company.
+                </p>
+              ) : (
+                jobs
+                  .filter(
+                    (job) =>
+                      job._id !== jobData._id &&
+                      job.companyId._id === jobData.companyId._id
+                  )
+                  .filter((job) => {
+                    const appliedJobsIds = new Set(
+                      jobsApplied.map((item) => item.jobId)
+                    );
+                    return !appliedJobsIds.has(job._id);
+                  })
+                  .slice(0, 4)
+                  .map((job, index) => <JobCard key={index} job={job} />)
+              )}
             </div>
           </div>
         </div>

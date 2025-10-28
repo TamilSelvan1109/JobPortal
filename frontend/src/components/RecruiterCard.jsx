@@ -39,7 +39,6 @@ const RecruiterCard = () => {
       }
       setRecruiterData(data.company);
       setLoading(false);
-      console.log(data.company);
     } catch (error) {
       toast.error(error.message);
     }
@@ -262,7 +261,7 @@ const RecruiterCard = () => {
                   <div>
                     <p className="text-xs text-gray-500">Email</p>
                     <p className="text-sm text-gray-900 break-all">
-                      {recruiterData.email}
+                      {recruiterData.createdBy.email}
                     </p>
                   </div>
                 </div>
@@ -271,7 +270,7 @@ const RecruiterCard = () => {
                   <div>
                     <p className="text-xs text-gray-500">Phone</p>
                     <p className="text-sm text-gray-900">
-                      {recruiterData.phone || "Not Available"}
+                      {recruiterData.createdBy.phone || "Not Available"}
                     </p>
                   </div>
                 </div>
