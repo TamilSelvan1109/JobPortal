@@ -1,10 +1,10 @@
 import bcrypt from "bcrypt";
-import { v2 as cloudinary } from "cloudinary";
 import Company from "../models/Company.js";
 import Job from "../models/Job.js";
 import JobApplication from "../models/JobApplication.js";
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
+import { uploadToS3 } from "../config/s3.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const imageUpload = await cloudinary.uploader.upload(profileImage.path);
+    const imageUpload = await uploadToS3(profileImage, "profile-images");
 
     const newUser = await User.create({
       name,
@@ -35,7 +35,7 @@ export const registerUser = async (req, res) => {
       phone,
       password: hashedPassword,
       role,
-      image: imageUpload.secure_url,
+      image: imageUpload,
     });
 
     let companyId = null;
@@ -44,7 +44,7 @@ export const registerUser = async (req, res) => {
       const newCompany = await Company.create({
         name,
         contactEmail: email,
-        image: imageUpload.secure_url,
+        image: imageUpload,
         createdBy: newUser._id,
       });
 
@@ -176,8 +176,7 @@ export const updateUserProfile = async (req, res) => {
     let uploadedImageUrl = null;
 
     if (profileImage) {
-      const upload = await cloudinary.uploader.upload(profileImage.path);
-      uploadedImageUrl = upload.secure_url;
+      uploadedImageUrl = await uploadToS3(profileImage, "profile-images");
     }
 
     const user = await User.findById(userId).populate("profile.company");
@@ -320,7 +319,6 @@ export const getUserJobApplications = async (req, res) => {
     if (!applications || applications.length === 0) {
       return res.json({
         success: false,
-        message: "No job applications found for this user",
       });
     }
 
@@ -355,8 +353,8 @@ export const updateUserResume = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Upload resume!" });
     }
-    const resumeUpload = await cloudinary.uploader.upload(resumeFile.path);
-    userData.profile.resume = resumeUpload.secure_url;
+    const resumeUrl = await uploadToS3(resumeFile, "resumes");
+    userData.profile.resume = resumeUrl;
     await userData.save();
     return res.json({
       success: true,

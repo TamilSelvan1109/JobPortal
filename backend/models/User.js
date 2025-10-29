@@ -28,7 +28,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isVerified: { type: Boolean, default: false },
     lastLogin: { type: Date },
     profile: {
       bio: { type: String, default: "" },

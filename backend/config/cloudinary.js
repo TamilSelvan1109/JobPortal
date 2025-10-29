@@ -1,11 +1,11 @@
-import { v2 as cloudinary } from "cloudinary";
+import { S3Client } from "@aws-sdk/client-s3";
 
-const connectCloudinary = async () => {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_SECRET_KEY,
-  });
-};
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
-export default connectCloudinary;
+export default s3Client;
